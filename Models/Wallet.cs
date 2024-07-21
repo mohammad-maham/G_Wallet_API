@@ -1,14 +1,14 @@
-namespace Wallet.Models;
-public class DepositRequest
-{
-    public int UserId { get; set; }
-    public decimal Amount { get; set; }
-}
+﻿using System;
+using System.Collections.Generic;
 
-public class WithdrawRequest
-{
-    public int UserId { get; set; }
-    public decimal Amount { get; set; }
-}
+namespace G_Wallet_API.Models;
 
- 
+public partial class Wallet
+{
+    public long Id { get; set; }
+
+    public long UserId { get; set; }
+
+
+    public short Status { get; set; }
+}
