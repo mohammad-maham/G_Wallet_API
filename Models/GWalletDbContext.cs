@@ -15,6 +15,8 @@ public partial class GWalletDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Bank> Banks { get; set; }
+
     public virtual DbSet<Currency> Currencies { get; set; }
 
     public virtual DbSet<Status> Statuses { get; set; }
@@ -38,11 +40,25 @@ public partial class GWalletDbContext : DbContext
     public virtual DbSet<Xchenger> Xchengers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796", x => x.UseNodaTime());
+    {
+        optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796", x => x.UseNodaTime());
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Bank>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Bank_pkey");
+
+            entity.ToTable("Bank");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.LogoPath).HasMaxLength(100);
+            entity.Property(e => e.Name).HasColumnType("character varying");
+        });
+
         modelBuilder.Entity<Currency>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("UnitType_pkey");

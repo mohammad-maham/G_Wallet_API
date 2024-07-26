@@ -18,5 +18,5 @@ public partial class Xchenger
 
     public decimal Amount { get; set; }
 
-    public OffsetTime? XchengData { get; set; }
+    public string? XchengData { get; set; } = null!;
 }

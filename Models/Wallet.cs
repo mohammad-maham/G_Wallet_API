@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NodaTime;
 
 namespace G_Wallet_API.Models;
 
@@ -9,6 +11,8 @@ public partial class Wallet
 
     public long UserId { get; set; }
 
+    public string? CreateDate { get; set; }
 
     public short Status { get; set; }
+
 }
