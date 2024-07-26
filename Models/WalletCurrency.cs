@@ -10,7 +10,7 @@ public partial class WalletCurrency
 
     public long WalletId { get; set; }
 
-    public short CurrencyId { get; set; }
+    public long CurrencyId { get; set; }
 
     public short Status { get; set; }
 
