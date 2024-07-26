@@ -18,7 +18,7 @@ public partial class Transaction
 
     public short? Status { get; set; }
 
-    public Instant TransactionDate { get; set; }
+    public string? TransactionDate { get; set; }
 
     public string? Info { get; set; }
 

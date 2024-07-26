@@ -12,13 +12,13 @@ public partial class WalletBankAccount
 
     public int BankId { get; set; }
 
-    public decimal BankAccountNumber { get; set; }
+    public long BankAccountNumber { get; set; }
 
     public int RegionId { get; set; }
 
     public short Status { get; set; }
 
-    public string? RegDate { get; set; }
+    public string RegDate { get; set; } = null!;
 
     public string Shaba { get; set; } = null!;
 
