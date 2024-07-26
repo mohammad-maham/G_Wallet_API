@@ -168,14 +168,39 @@ public class FundController : ControllerBase
     [HttpPost]
     [Route("[action]")]
     [GoldAuthorize]
-    public ApiResponse ExChange([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> ExChange([FromQuery] Xchenger model)
     {
+
         try
         {
+            var t = await _wallet.WalletCurrencies
+                .FirstOrDefaultAsync(x => x.WalletId == model.WalleId
+                && x.CurrencyId == model.SourceWalletCurrency);
 
-            var t = _fund.GetWalletCurrency(model);
-            string? jsonData = JsonConvert.SerializeObject(t);
-            return new ApiResponse(data: jsonData);
+            if (t == null || t.Amount < model.SourceAmount)
+                return BadRequest(new ApiResponse(700));
+
+            var sw = await _fund.Windrow(new WalletCurrency()
+            {
+                WalletId = model.WalleId,
+                CurrencyId = model.SourceWalletCurrency,
+                Amount = model.SourceAmount
+            });
+
+            if (sw != null)
+            {
+                var dw = await _fund.Deposit(new WalletCurrency()
+                {
+                    WalletId = model.WalleId,
+                    CurrencyId = model.DestinationWalletCurrency,
+                    Amount = model.DestinationAmount
+                });
+
+                if (dw != null)
+                    return Ok(new ApiResponse());
+            }
+
+            return BadRequest(new ApiResponse(500));
 
         }
         catch (Exception e)
