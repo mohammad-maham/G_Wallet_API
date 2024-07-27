@@ -11,5 +11,6 @@ public interface IFund
     //Task<WalletCurrency?> AddWalletCurrency(WalletCurrency model);
     Task<WalletBankAccount?> AddBankAccount(WalletBankAccount model);
     IEnumerable<WalletCurrency> GetWalletCurrency(WalletCurrency model);
+    Task <IEnumerable<WalletCurrency>> AddExchange(Xchenger model);
 
 }
