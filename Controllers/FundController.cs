@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using G_Wallet_API.Models;
+﻿using G_APIs.Common;
 using G_Wallet_API.BusinessLogic.Interfaces;
-using Accounting.Errors;
-using Newtonsoft.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using G_Wallet_API.Common;
+using G_Wallet_API.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using G_APIs.Models;
+using Newtonsoft.Json;
 
 namespace G_Wallet_API.Controllers;
 
@@ -180,28 +178,12 @@ public class FundController : ControllerBase
             if (t == null || t.Amount < model.SourceAmount)
                 return BadRequest(new ApiResponse(700));
 
-            var sw = await _fund.Windrow(new WalletCurrency()
-            {
-                WalletId = model.WalleId,
-                CurrencyId = model.SourceWalletCurrency,
-                Amount = model.SourceAmount
-            });
 
-            if (sw != null)
-            {
-                var dw = await _fund.Deposit(new WalletCurrency()
-                {
-                    WalletId = model.WalleId,
-                    CurrencyId = model.DestinationWalletCurrency,
-                    Amount = model.DestinationAmount
-                });
-
-                if (dw != null)
-                    return Ok(new ApiResponse());
-            }
+           var exchange = await _fund.AddExchange(model);
+            if (exchange != null)
+                return Ok(new ApiResponse());
 
             return BadRequest(new ApiResponse(500));
-
         }
         catch (Exception e)
         {

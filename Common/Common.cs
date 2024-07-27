@@ -1,5 +1,4 @@
-﻿using G_APIs.Models;
-using Microsoft.AspNetCore.Hosting.Server;
+﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -12,9 +11,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
-using Font = System.Drawing.Font;
 
-namespace G_APIs.Common;
+namespace G_Wallet_API.Common;
 
 
 public static class Common

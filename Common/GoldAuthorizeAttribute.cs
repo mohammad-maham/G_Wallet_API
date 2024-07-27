@@ -5,7 +5,8 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using System.Net.Http.Headers;
 
-namespace G_APIs.Models;
+namespace G_APIs.Common;
+
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 
 public class GoldAuthorizeAttribute : Attribute, IAuthorizationFilter
