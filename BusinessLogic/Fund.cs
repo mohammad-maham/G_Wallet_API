@@ -4,6 +4,7 @@ using G_Wallet_API.BusinessLogic.Interfaces;
 using G_Wallet_API.Common;
 using G_Wallet_API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
@@ -44,16 +45,29 @@ public class Fund : IFund
         return t;
     }
 
-    public IEnumerable<WalletCurrency> GetWalletCurrency(WalletCurrency model)
+    public async Task<IEnumerable<WalletCurrency>> GetWalletCurrency(Wallet model)
     {
-        var t = (from a in _wallet.WalletCurrencies where a.WalletId == model.WalletId select a).AsEnumerable<WalletCurrency>();
-        return t;
+        //   var t = (
+        //from w in _wallet.Wallets
+        //join wc in _wallet.WalletCurrencies on w.Id equals wc.WalletId
+        //where (w.UserId == model.UserId)
+        //select wc  
+        //).FirstOrDefault();
+        var query = """SELECT * FROM public."WalletCurrency",public."Wallet" """;
+        var dt = await new PostgresDbHelper().RunQuery(query);
+
+        if (dt != null)
+            return dt.AsEnumerable<WalletCurrency>();
+
+        return null;
+
+        //var t = (from a in _wallet.WalletCurrencies where a.WalletId == model.WalletId select a).AsEnumerable<WalletCurrency>();
     }
 
     public async Task<WalletCurrency?> Deposit(WalletCurrency model)
     {
-        model.TransactionType = (int)Enums.TransactionType.Deposit;
-        model.TransactionMode = (int)Enums.TransactionMode.Online;
+        model.TransactionModeId = (int)Enums.TransactionType.Deposit;
+        model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -63,16 +77,16 @@ public class Fund : IFund
         if (model.Amount > 0)
             model.Amount *= -1;
 
-        model.TransactionType = (int)Enums.TransactionType.Windrow;
-        model.TransactionMode = (int)Enums.TransactionMode.Online;
+        model.TransactionTypeId = (int)Enums.TransactionType.Windrow;
+        model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
 
     public async Task<WalletCurrency?> Sell(WalletCurrency model)
     {
-        model.TransactionType = (int)Enums.TransactionType.Sell;
-        model.TransactionMode = (int)Enums.TransactionMode.Online;
+        model.TransactionTypeId = (int)Enums.TransactionType.Sell;
+        model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -82,8 +96,8 @@ public class Fund : IFund
         if (model.Amount > 0)
             model.Amount *= -1;
 
-        model.TransactionType = (int)Enums.TransactionType.Buy;
-        model.TransactionMode = (int)Enums.TransactionMode.Online;
+        model.TransactionTypeId = (int)Enums.TransactionType.Buy;
+        model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -152,8 +166,8 @@ public class Fund : IFund
                     WalletId = model.WalletId,
                     WalletCurrencyId = model.CurrencyId,
                     Status = 1,
-                    TransactionModeId = model.TransactionMode,
-                    TransactionTypeId = model.TransactionType,
+                    TransactionModeId = model.TransactionModeId,
+                    TransactionTypeId = model.TransactionTypeId,
                     Amount = model.Amount
                 });
 

@@ -20,7 +20,7 @@ public partial class WalletCurrency
 
     public string? WcAddress { get; set; }
 
-    public short TransactionMode { get; set; }
-    public short TransactionType { get; set; }
+     public short? TransactionTypeId { get; set; }
+     public short? TransactionModeId { get; set; }
 
 }
