@@ -18,7 +18,7 @@ public partial class WalletBankAccount
 
     public short Status { get; set; }
 
-    public string RegDate { get; set; } = null!;
+    public DateTime RegDate { get; set; }  
 
     public string Shaba { get; set; } = null!;
 
