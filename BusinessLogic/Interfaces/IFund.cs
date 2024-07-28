@@ -10,9 +10,8 @@ public interface IFund
     Task<WalletCurrency?> Windrow(WalletCurrency model);
     Task<Transaction?> AddTransaction(Transaction model);
     Task<Wallet?> GetWallet(Wallet model);
-    //Task<WalletCurrency?> AddWalletCurrency(WalletCurrency model);
     Task<WalletBankAccount?> AddBankAccount(WalletBankAccount model);
-    IEnumerable<WalletCurrency> GetWalletCurrency(WalletCurrency model);
     Task <IEnumerable<WalletCurrency>> AddExchange(Xchenger model);
+     Task<IEnumerable<WalletCurrency>> GetWalletCurrency(Wallet model);
 
 }

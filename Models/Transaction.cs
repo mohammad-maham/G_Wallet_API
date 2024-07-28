@@ -12,9 +12,9 @@ public partial class Transaction
 
     public long WalletCurrencyId { get; set; }
 
-    public short TransactionTypeId { get; set; }
+    public short? TransactionTypeId { get; set; }
 
-    public short TransactionModeId { get; set; }
+    public short? TransactionModeId { get; set; }
 
     public short? Status { get; set; }
 

@@ -178,14 +178,19 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public ApiResponse GetWalletCurrency([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> GetWalletCurrency([FromQuery] Wallet model)
     {
         try
         {
 
-            var t = _fund.GetWalletCurrency(model);
+            var t = await _fund.GetWalletCurrency(model);
+
+            if(t == null)
+                return BadRequest(new ApiResponse(400));
+
             string? jsonData = JsonConvert.SerializeObject(t);
-            return new ApiResponse(data: jsonData);
+
+            return Ok(new ApiResponse(data: jsonData));
 
         }
         catch (Exception e)
