@@ -26,7 +26,6 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public async Task<IActionResult> GetWallet([FromQuery] Wallet model)
     {
         try
@@ -55,7 +54,6 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public async Task<IActionResult> Windrow([FromQuery] WalletCurrency model)
     {
         try
@@ -81,7 +79,6 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public async Task<IActionResult> Deposit([FromQuery] WalletCurrency model)
     {
         try
@@ -102,7 +99,45 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
+    public async Task<IActionResult> Buy([FromQuery] WalletCurrency model)
+    {
+        try
+        {
+            await _fund.Buy(model);
+
+            string? jsonData = JsonConvert.SerializeObject(model);
+            return Ok(new ApiResponse(data: jsonData));
+
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine(e.Message);
+            throw;
+        }
+    }
+
+    [HttpPost]
+    [Route("[action]")]
+    public async Task<IActionResult> Sell([FromQuery] WalletCurrency model)
+    {
+        try
+        {
+            await _fund.Sell(model);
+
+            string? jsonData = JsonConvert.SerializeObject(model);
+            return Ok(new ApiResponse(data: jsonData));
+
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine(e.Message);
+            throw;
+        }
+    }
+    [HttpPost]
+    [Route("[action]")]
     public async Task<IActionResult> AddTransaction([FromQuery] Transaction model)
     {
         try
@@ -123,7 +158,6 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public async Task<IActionResult> AddBankAccount([FromQuery] WalletBankAccount model)
     {
         try
@@ -144,7 +178,6 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public ApiResponse GetWalletCurrency([FromQuery] WalletCurrency model)
     {
         try
@@ -165,7 +198,6 @@ public class FundController : ControllerBase
     }
     [HttpPost]
     [Route("[action]")]
-    [GoldAuthorize]
     public async Task<IActionResult> ExChange([FromQuery] Xchenger model)
     {
 

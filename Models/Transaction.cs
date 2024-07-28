@@ -18,11 +18,13 @@ public partial class Transaction
 
     public short? Status { get; set; }
 
-    public string? TransactionDate { get; set; }
+    public DateTime TransactionDate { get; set; }
 
     public string? Info { get; set; }
 
     public string? OrderId { get; set; }
 
     public string? TrackingCode { get; set; }
+    public decimal Amount { get; set; }
+
 }

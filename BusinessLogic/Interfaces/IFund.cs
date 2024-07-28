@@ -5,6 +5,8 @@ namespace G_Wallet_API.BusinessLogic.Interfaces;
 public interface IFund
 {
     Task<WalletCurrency?> Deposit(WalletCurrency model);
+    Task<WalletCurrency?> Sell(WalletCurrency model);
+    Task<WalletCurrency?> Buy(WalletCurrency model);
     Task<WalletCurrency?> Windrow(WalletCurrency model);
     Task<Transaction?> AddTransaction(Transaction model);
     Task<Wallet?> GetWallet(Wallet model);

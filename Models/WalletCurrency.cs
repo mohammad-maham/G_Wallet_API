@@ -14,9 +14,13 @@ public partial class WalletCurrency
 
     public short Status { get; set; }
 
-    public string? RegDate { get; set; }
+    public DateTime RegDate { get; set; }
 
     public decimal Amount { get; set; }
 
-    public string WcAddress { get; set; } = null!;
+    public string? WcAddress { get; set; }
+
+    public short TransactionMode { get; set; }
+    public short TransactionType { get; set; }
+
 }
