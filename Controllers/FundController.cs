@@ -56,12 +56,12 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> GetWalletCurrency(int userId)
+    public async Task<IActionResult> GetWalletCurrency(Wallet model)
     {
         try
         {
 
-            var t = await _fund.GetWalletCurrency(userId);
+            var t = await _fund.GetWalletCurrency((int)model.UserId);
 
             if (t == null)
                 return BadRequest(new ApiResponse(400));
