@@ -40,11 +40,7 @@ public partial class GWalletDbContext : DbContext
     public virtual DbSet<Xchenger> Xchengers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796", x => x.UseNodaTime());
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-    }
+        => optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796;SearchPath=public", x => x.UseNodaTime());
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -179,8 +175,12 @@ public partial class GWalletDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.DestinationAddress).HasMaxLength(64);
             entity.Property(e => e.SourceAddress).HasMaxLength(64);
-            entity.Property(e => e.XchengData).HasColumnName("XChengData");
         });
+        modelBuilder.HasSequence("seq_bankaccount");
+        modelBuilder.HasSequence("seq_exchanger");
+        modelBuilder.HasSequence("seq_transactionid");
+        modelBuilder.HasSequence("seq_walletcurrency");
+        modelBuilder.HasSequence("seq_walletid");
 
         OnModelCreatingPartial(modelBuilder);
     }

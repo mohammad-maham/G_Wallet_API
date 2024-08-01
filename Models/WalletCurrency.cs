@@ -10,7 +10,7 @@ public partial class WalletCurrency
 
     public long WalletId { get; set; }
 
-    public long CurrencyId { get; set; }
+    public short CurrencyId { get; set; }
 
     public short Status { get; set; }
 
@@ -19,8 +19,4 @@ public partial class WalletCurrency
     public decimal Amount { get; set; }
 
     public string? WcAddress { get; set; }
-
-     public short? TransactionTypeId { get; set; }
-     public short? TransactionModeId { get; set; }
-
 }
