@@ -26,12 +26,14 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> GetWallet([FromQuery] Wallet model)
+    public async Task<IActionResult> GetWallet(Wallet model)
     {
         try
         {
+            if(model.UserId <= 0)
+                return BadRequest(new ApiResponse(500));
 
-            var t = await _fund.GetWallet(model);
+            var t = await _fund.GetWallet((int)model.UserId);
 
             if (t != null)
             {
@@ -52,6 +54,32 @@ public class FundController : ControllerBase
         }
     }
 
+    [HttpPost]
+    [Route("[action]")]
+    public async Task<IActionResult> GetWalletCurrency(int userId)
+    {
+        try
+        {
+
+            var t = await _fund.GetWalletCurrency(userId);
+
+            if (t == null)
+                return BadRequest(new ApiResponse(400));
+
+            string? jsonData = JsonConvert.SerializeObject(t);
+
+            return Ok(new ApiResponse(data: jsonData));
+
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine(e.Message);
+            throw;
+
+        }
+
+    }
     [HttpPost]
     [Route("[action]")]
     public async Task<IActionResult> Windrow([FromQuery] WalletCurrency model)
@@ -176,31 +204,7 @@ public class FundController : ControllerBase
         }
     }
 
-    [HttpPost]
-    [Route("[action]")]
-    public async Task<IActionResult> GetWalletCurrency([FromQuery] Wallet model)
-    {
-        try
-        {
-
-            var t = await _fund.GetWalletCurrency(model);
-
-            if(t == null)
-                return BadRequest(new ApiResponse(400));
-
-            string? jsonData = JsonConvert.SerializeObject(t);
-
-            return Ok(new ApiResponse(data: jsonData));
-
-        }
-        catch (Exception e)
-        {
-
-            Console.WriteLine(e.Message);
-            throw;
-
-        }
-    }
+    
     [HttpPost]
     [Route("[action]")]
     public async Task<IActionResult> ExChange([FromQuery] Xchenger model)
@@ -208,12 +212,12 @@ public class FundController : ControllerBase
 
         try
         {
-            var t = await _wallet.WalletCurrencies
-                .FirstOrDefaultAsync(x => x.WalletId == model.WalleId
-                && x.CurrencyId == model.SourceWalletCurrency);
+            //var t = await _wallet.WalletCurrencies
+            //    .FirstOrDefaultAsync(x => x.WalletId == model.WalleId
+            //    && x.CurrencyId == model.SourceWalletCurrency);
 
-            if (t == null || t.Amount < model.SourceAmount)
-                return BadRequest(new ApiResponse(700));
+            //if (t == null || t.Amount < model.SourceAmount)
+            //    return BadRequest(new ApiResponse(700));
 
 
            var exchange = await _fund.AddExchange(model);

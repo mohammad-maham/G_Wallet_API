@@ -1,13 +1,8 @@
 ﻿using FarsiLibrary.Utils;
-using G_APIs.Common;
 using G_Wallet_API.BusinessLogic.Interfaces;
 using G_Wallet_API.Common;
 using G_Wallet_API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Linq;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace G_Wallet_API.BusinessLogic;
 
@@ -22,16 +17,16 @@ public class Fund : IFund
         _logger = logger;
     }
 
-    public async Task<Wallet?> GetWallet(Wallet model)
+    public async Task<Wallet?> GetWallet(int userId)
     {
-        var t = await _wallet.Wallets.FirstOrDefaultAsync(x => x.UserId == model.UserId);
+        var t = await _wallet.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (t == null)
         {
             Wallet? w = new()
             {
                 Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletid"),
-                UserId = model.UserId,
+                UserId = userId,
                 CreateDate = new PersianDate(DateTime.Now),
                 Status = 1
             };
@@ -45,29 +40,38 @@ public class Fund : IFund
         return t;
     }
 
-    public async Task<IEnumerable<WalletCurrency>> GetWalletCurrency(Wallet model)
+    public async Task<IEnumerable<WalletCurrency>> GetWalletCurrency(int userId)
     {
-        //   var t = (
-        //from w in _wallet.Wallets
-        //join wc in _wallet.WalletCurrencies on w.Id equals wc.WalletId
-        //where (w.UserId == model.UserId)
-        //select wc  
-        //).FirstOrDefault();
-        var query = """SELECT * FROM public."WalletCurrency",public."Wallet" """;
+
+        var query = @$"SELECT WC.*,
+	                    CU.""Name"",
+	                    U.""Name"" AS ""CurrencyName""
+                    FROM ""WalletCurrency"" WC,
+	                    ""Wallet"" W,
+	                    ""Currency"" CU,
+	                    ""Unit"" U
+                    WHERE W.""UserId"" = {userId}
+	                    AND WC.""WalletId"" = W.""Id""
+	                    AND WC.""CurrencyId"" = CU.""Id""
+	                    AND CU.""UnitId"" = U.""Id""";
+
         var dt = await new PostgresDbHelper().RunQuery(query);
 
-        if (dt != null)
-            return dt.AsEnumerable<WalletCurrency>();
+        var res= dt.AsEnumerable<WalletCurrency>();
 
-        return null;
+        //var res = await _wallet.Wallets
+        //    .SelectMany(x =>
+        //    _wallet.WalletCurrencies
+        //    .Where(y => y.WalletId == x.Id), (a, b) => new { a, b })
+        //    .Select(x => x.b).ToListAsync();
 
-        //var t = (from a in _wallet.WalletCurrencies where a.WalletId == model.WalletId select a).AsEnumerable<WalletCurrency>();
+        return res;
     }
 
     public async Task<WalletCurrency?> Deposit(WalletCurrency model)
     {
-        model.TransactionModeId = (int)Enums.TransactionType.Deposit;
-        model.TransactionModeId = (int)Enums.TransactionMode.Online;
+        //model.tra = (int)Enums.TransactionType.Deposit;
+        //model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -77,16 +81,16 @@ public class Fund : IFund
         if (model.Amount > 0)
             model.Amount *= -1;
 
-        model.TransactionTypeId = (int)Enums.TransactionType.Windrow;
-        model.TransactionModeId = (int)Enums.TransactionMode.Online;
+        //model.TransactionTypeId = (int)Enums.TransactionType.Windrow;
+        //model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
 
     public async Task<WalletCurrency?> Sell(WalletCurrency model)
     {
-        model.TransactionTypeId = (int)Enums.TransactionType.Sell;
-        model.TransactionModeId = (int)Enums.TransactionMode.Online;
+        //model.TransactionTypeId = (int)Enums.TransactionType.Sell;
+        //model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -96,8 +100,8 @@ public class Fund : IFund
         if (model.Amount > 0)
             model.Amount *= -1;
 
-        model.TransactionTypeId = (int)Enums.TransactionType.Buy;
-        model.TransactionModeId = (int)Enums.TransactionMode.Online;
+        //model.TransactionTypeId = (int)Enums.TransactionType.Buy;
+        //model.TransactionModeId = (int)Enums.TransactionMode.Online;
 
         return await AddWalletCurrency(model);
     }
@@ -166,9 +170,8 @@ public class Fund : IFund
                     WalletId = model.WalletId,
                     WalletCurrencyId = model.CurrencyId,
                     Status = 1,
-                    TransactionModeId = model.TransactionModeId,
-                    TransactionTypeId = model.TransactionTypeId,
-                    Amount = model.Amount
+                    TransactionModeId = 1,
+                    TransactionTypeId = 1,
                 });
 
 
@@ -204,24 +207,24 @@ public class Fund : IFund
         {
             using (var transaction = await context.Database.BeginTransactionAsync())
             {
-                model.XchengData = new PersianDate(DateTime.Now);
+                model.ExChangeData = new PersianDate(DateTime.Now);
 
                 await _wallet.Xchengers.AddAsync(model);
 
                 var sw = await Windrow(new WalletCurrency()
                 {
-                    WalletId = model.WalleId,
-                    CurrencyId = model.SourceWalletCurrency,
-                    Amount = model.SourceAmount
+                    //WalletId = model.WalleId,
+                    //CurrencyId = model.SourceWalletCurrency,
+                    //Amount = model.SourceAmount
                 });
 
                 if (sw != null)
                 {
                     var dw = await Deposit(new WalletCurrency()
                     {
-                        WalletId = model.WalleId,
-                        CurrencyId = model.DestinationWalletCurrency,
-                        Amount = model.DestinationAmount
+                        //WalletId = model.WalleId,
+                        //CurrencyId = model.DestinationWalletCurrency,
+                        //Amount = model.DestinationAmount
                     });
 
                     _wallet.SaveChanges();

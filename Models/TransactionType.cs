@@ -10,7 +10,4 @@ public partial class TransactionType
     public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
-
 }
-
- 
