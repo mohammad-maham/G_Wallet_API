@@ -212,15 +212,23 @@ public class FundController : ControllerBase
 
         try
         {
-            //var t = await _wallet.WalletCurrencies
-            //    .FirstOrDefaultAsync(x => x.WalletId == model.WalleId
-            //    && x.CurrencyId == model.SourceWalletCurrency);
+            var t = await _wallet.WalletCurrencies
+                .Where(x => x.WalletId == model.WalletId && x.CurrencyId == model.SourceWalletCurrency)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.Amount
+                })
+                .FirstOrDefaultAsync();
+            
+            if(t==null)
+                return BadRequest(new ApiResponse(message="کیف پول مبدا پیدا نشد."));
 
-            //if (t == null || t.Amount < model.SourceAmount)
-            //    return BadRequest(new ApiResponse(700));
+            if (t.Amount<model.SourceAmount)
+                return BadRequest(new ApiResponse(message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد."));
 
+            var exchange = await _fund.AddExchange(model);
 
-           var exchange = await _fund.AddExchange(model);
             if (exchange != null)
                 return Ok(new ApiResponse());
 
