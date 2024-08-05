@@ -44,8 +44,8 @@ public class Fund : IFund
     {
 
         var query = @$"SELECT WC.*,
-	                    CU.""Name"",
-	                    U.""Name"" AS ""CurrencyName""
+	                    CU.""Name"" AS ""CurrencyName"",
+	                    U.""Name"" AS ""Unit""
                     FROM ""WalletCurrency"" WC,
 	                    ""Wallet"" W,
 	                    ""Currency"" CU,

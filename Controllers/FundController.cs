@@ -56,7 +56,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> GetWalletCurrency(Wallet model)
+    public async Task<IActionResult> GetWalletCurrency([FromBody] Wallet model)
     {
         try
         {
@@ -82,7 +82,7 @@ public class FundController : ControllerBase
     }
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> Windrow([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> Windrow([FromBody] WalletCurrency model)
     {
         try
         {
@@ -107,7 +107,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> Deposit([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> Deposit([FromBody] WalletCurrency model)
     {
         try
         {
@@ -127,7 +127,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> Buy([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> Buy([FromBody] WalletCurrency model)
     {
         try
         {
@@ -147,7 +147,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> Sell([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> Sell([FromBody] WalletCurrency model)
     {
         try
         {
@@ -166,7 +166,7 @@ public class FundController : ControllerBase
     }
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> AddTransaction([FromQuery] Transaction model)
+    public async Task<IActionResult> AddTransaction([FromBody] Transaction model)
     {
         try
         {
@@ -186,7 +186,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> AddBankAccount([FromQuery] WalletBankAccount model)
+    public async Task<IActionResult> AddBankAccount([FromBody] WalletBankAccount model)
     {
         try
         {
@@ -207,7 +207,7 @@ public class FundController : ControllerBase
     
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> ExChange([FromQuery] Xchenger model)
+    public async Task<IActionResult> ExChange([FromBody] Xchenger model)
     {
 
         try
