@@ -57,7 +57,7 @@ public class Fund : IFund
 
         var dt = await new PostgresDbHelper().RunQuery(query);
 
-        var res= dt.AsEnumerable<WalletCurrency>();
+        var res = dt.AsEnumerable<WalletCurrency>();
 
         //var res = await _wallet.Wallets
         //    .SelectMany(x =>
@@ -163,19 +163,28 @@ public class Fund : IFund
         {
             using (var transaction = await context.Database.BeginTransactionAsync())
             {
-                await _wallet.Transactions.AddAsync(new Transaction
+                await _wallet.Xchengers.AddAsync(new Xchenger
                 {
-                    Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transaction"),
-                    TransactionDate = new PersianDate(DateTime.Now),
+                    Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_exchanger"),
+                    ExChangeData = new PersianDate(DateTime.Now),
                     WalletId = model.WalletId,
-                    WalletCurrencyId = model.CurrencyId,
+                    RegUserId = model.user,
                     Status = 1,
-                    TransactionModeId = 1,
-                    TransactionTypeId = 1,
+                    SourceWalletCurrency = model.w
                 });
 
 
-                var t = await _wallet.WalletCurrencies.FirstOrDefaultAsync(x => x.WalletId == model.WalletId && x.CurrencyId == model.CurrencyId);
+                var t = await _wallet.WalletCurrencies
+                    .Where(x => x.WalletId == model.WalletId && x.CurrencyId == model.CurrencyId)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.WalletId,
+                        x.CurrencyId,
+                        x.Amount
+                    })
+                    .FirstOrDefaultAsync();
+
 
                 if (t == null)
                 {
@@ -207,39 +216,60 @@ public class Fund : IFund
         {
             using (var transaction = await context.Database.BeginTransactionAsync())
             {
-                model.ExChangeData = new PersianDate(DateTime.Now);
+                //model.ExChangeData = new PersianDate( model.ExChangeData.ToShortDateString());
 
-                await _wallet.Xchengers.AddAsync(model);
+                _ = await _wallet.Xchengers.AddAsync(model);
 
-                var sw = await Windrow(new WalletCurrency()
+                var sourceWallet = new WalletCurrency
                 {
-                    //WalletId = model.WalleId,
-                    //CurrencyId = model.SourceWalletCurrency,
-                    //Amount = model.SourceAmount
-                });
+                    WalletId = model.WalletId,
+                    CurrencyId = model.SourceWalletCurrency,
+                    Amount = -model.SourceAmount
+                };
 
-                if (sw != null)
-                {
-                    var dw = await Deposit(new WalletCurrency()
+                 var t = await _wallet.WalletCurrencies
+                    .Where(x => x.WalletId == model.WalletId && x.CurrencyId == model.DestinationWalletCurrency)
+                    .Select(x => new
                     {
-                        //WalletId = model.WalleId,
-                        //CurrencyId = model.DestinationWalletCurrency,
-                        //Amount = model.DestinationAmount
-                    });
+                        x.Id,
+                        x.Amount += model.DestinationAmout
+                    })
+                    .FirstOrDefaultAsync();
 
-                    _wallet.SaveChanges();
+                //WalletCurrency destWallet;
+                if (t == null)
+                {
+                    t = new WalletCurrency
+                    {
+                        Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletcurrency"),
+                        WalletId = model.WalletId,
+                        Amount = model.DestinationAmout,
+                        CurrencyId = model.DestinationWalletCurrency,
+                        RegDate = DateTime.Now,
+                        Status = 1,
+                        Unit = _wallet.Currencies.Where(x => x.Id == model.DestinationWalletCurrency).Select(x => new { x.UnitId }),
+                    };
 
-                    if (dw != null)
-                        return _wallet.WalletCurrencies.AsEnumerable<WalletCurrency>();
+                      await _wallet.WalletCurrencies.AddAsync(t);
+
                 }
 
+                if (t != null)
+                    await _wallet.Update(t);
             }
-        }
 
+
+            _wallet.Entry(t).State = EntityState.Modified;
+            await _wallet.SaveChangesAsync();
+
+            return t;
+
+        }
         return null;
     }
 
 }
+
 
 
 
