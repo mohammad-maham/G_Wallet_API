@@ -40,7 +40,11 @@ public partial class GWalletDbContext : DbContext
     public virtual DbSet<Xchenger> Xchengers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796;SearchPath=public", x => x.UseNodaTime());
+    {
+        optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796;SearchPath=public", x => x.UseNodaTime());
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

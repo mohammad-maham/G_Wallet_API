@@ -4,7 +4,7 @@ using NodaTime;
 
 namespace G_Wallet_API.Models;
 
-public partial class WalletCurrency
+public partial class WalletCurrencyVM
 {
     public long Id { get; set; }
 
@@ -19,5 +19,8 @@ public partial class WalletCurrency
     public decimal Amount { get; set; }
 
     public string? WcAddress { get; set; }
+    public string? Unit { get; set; }
+
+    public string? CurrencyName { get; set; }
 
 }

@@ -14,7 +14,7 @@ public partial class Xchenger
 
     public short SourceWalletCurrency { get; set; }
 
-    public long DestinationWalletCurrency { get; set; }
+    public short DestinationWalletCurrency { get; set; }
 
     public decimal SourceAmount { get; set; }
 
