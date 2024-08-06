@@ -41,7 +41,9 @@ public partial class GWalletDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796;SearchPath=public", x => x.UseNodaTime());
+        optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796;SearchPath=public", x => x.UseNodaTime()
+        .CommandTimeout(40));
+
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
     }

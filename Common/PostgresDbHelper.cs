@@ -17,17 +17,18 @@ public class PostgresDbHelper
     }
 
 
-    public async Task<DataTable> RunQuery(string query)
+    public DataTable RunQuery(string query)
     {
         using (var connection = GetConnection())
         {
-           await connection.OpenAsync();
+            connection.OpenAsync();
             using (var command = new NpgsqlCommand(query, connection))
             {
                 using (var adapter = new NpgsqlDataAdapter(command))
                 {
                     var dt = new DataTable();
-                    await Task.Run(() => adapter.Fill(dt));
+                    adapter.Fill(dt);
+                    //Task.Run(() => adapter.Fill(dt));
                     return dt;
                 }
             }
