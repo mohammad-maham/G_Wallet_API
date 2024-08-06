@@ -21,7 +21,6 @@
 //app.MapControllers();
 
 //app.Run();
-using G_APIs.Common;
 using G_Wallet_API.BusinessLogic;
 using G_Wallet_API.BusinessLogic.Interfaces;
 using G_Wallet_API.Models;
@@ -95,7 +94,7 @@ options => options.UseNodaTime()));
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseMiddleware<ExceptionMiddleware>();
+        //app.UseMiddleware<ExceptionMiddleware>();
         app.MapControllers();
 
         app.Run();

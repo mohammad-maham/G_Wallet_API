@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace G_APIs.Common;
+namespace G_Wallet_API.Common;
 
 public class Enums
 {
@@ -18,15 +18,15 @@ public class Enums
 
     public enum TransactionType
     {
-        Deposit = 4,
-        Windrow = 3,
         Sell = 1,
-        Buy = 2
+        Buy = 2,
+        Windrow = 3,
+        Deposit = 4
     }
     public enum TransactionMode
     {
         Offline = 1,
-        Online= 2,
+        Online = 2,
     }
     public enum Unit
     {

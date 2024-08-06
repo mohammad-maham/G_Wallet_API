@@ -1,5 +1,4 @@
-﻿using G_APIs.Common;
-using G_Wallet_API.BusinessLogic.Interfaces;
+﻿using G_Wallet_API.BusinessLogic.Interfaces;
 using G_Wallet_API.Common;
 using G_Wallet_API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +25,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> GetWallet(Wallet model)
+    public async Task<IActionResult> GetWallet([FromBody] Wallet model)
     {
         try
         {
@@ -42,8 +41,7 @@ public class FundController : ControllerBase
             }
 
             return BadRequest(new ApiResponse(500));
-
-
+            
         }
         catch (Exception e)
         {
@@ -56,7 +54,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> GetWalletCurrency(Wallet model)
+    public async Task<IActionResult> GetWalletCurrency([FromBody] Wallet model)
     {
         try
         {
@@ -82,7 +80,7 @@ public class FundController : ControllerBase
     }
     [HttpPost]
     [Route("[action]")]
-    public async Task<IActionResult> Windrow([FromQuery] WalletCurrency model)
+    public async Task<IActionResult> Windrow([FromBody] WalletCurrency model)
     {
         try
         {
@@ -91,7 +89,7 @@ public class FundController : ControllerBase
             if (t == null || t.Amount < model.Amount)
                 return BadRequest(new ApiResponse(700));
 
-            await _fund.Windrow(model);
+            //await _fund.Windrow(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -111,7 +109,11 @@ public class FundController : ControllerBase
     {
         try
         {
-            await _fund.Deposit(model);
+            var t = await _fund.FindWallerCurrencyAsync(model.WalletId, model.CurrencyId);
+            if (t == null)
+                return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
+
+            //await _fund.Deposit(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -125,45 +127,7 @@ public class FundController : ControllerBase
         }
     }
 
-    [HttpPost]
-    [Route("[action]")]
-    public async Task<IActionResult> Buy([FromQuery] WalletCurrency model)
-    {
-        try
-        {
-            await _fund.Buy(model);
-
-            string? jsonData = JsonConvert.SerializeObject(model);
-            return Ok(new ApiResponse(data: jsonData));
-
-        }
-        catch (Exception e)
-        {
-
-            Console.WriteLine(e.Message);
-            throw;
-        }
-    }
-
-    [HttpPost]
-    [Route("[action]")]
-    public async Task<IActionResult> Sell([FromQuery] WalletCurrency model)
-    {
-        try
-        {
-            await _fund.Sell(model);
-
-            string? jsonData = JsonConvert.SerializeObject(model);
-            return Ok(new ApiResponse(data: jsonData));
-
-        }
-        catch (Exception e)
-        {
-
-            Console.WriteLine(e.Message);
-            throw;
-        }
-    }
+    
     [HttpPost]
     [Route("[action]")]
     public async Task<IActionResult> AddTransaction([FromQuery] Transaction model)
@@ -212,20 +176,12 @@ public class FundController : ControllerBase
 
         try
         {
-            var t = await _wallet.WalletCurrencies
-                .Where(x => x.WalletId == model.WalletId && x.CurrencyId == model.SourceWalletCurrency)
-                .Select(x => new
-                {
-                    x.Id,
-                    x.Amount
-                })
-                .FirstOrDefaultAsync();
-            
+            var t = await _fund.FindWallerCurrencyAsync(model.WalletId,model.SourceWalletCurrency);
             if(t==null)
-                return BadRequest(new ApiResponse(message="کیف پول مبدا پیدا نشد."));
+                return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
 
             if (t.Amount<model.SourceAmount)
-                return BadRequest(new ApiResponse(message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد."));
+                return BadRequest(new ApiResponse { Message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد." });
 
             var exchange = await _fund.AddExchange(model);
 
