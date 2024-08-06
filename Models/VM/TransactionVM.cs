@@ -22,6 +22,6 @@
 
         public string? TrackingCode { get; set; }
 
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
     }
 }

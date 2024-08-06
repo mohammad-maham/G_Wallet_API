@@ -17,15 +17,15 @@ public class Fund : IFund
         _logger = logger;
     }
 
-    public async Task<WalletCurrency?> FindWallerCurrencyAsync(long walletId, int currencyId)
+    public WalletCurrency? FindWallerCurrency(long walletId, long currencyId)
     {
-        var wc = await _wallet.WalletCurrencies.FirstOrDefaultAsync(x => x.WalletId == walletId && x.CurrencyId == currencyId);
+        var wc = _wallet.WalletCurrencies.FirstOrDefault(x => x.WalletId == walletId && x.CurrencyId == currencyId);
         return wc;
     }
 
-    public async Task<Wallet?> GetWallet(int userId)
+    public Wallet? GetWallet(int userId)
     {
-        var t = await _wallet.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
+        var t = _wallet.Wallets.FirstOrDefault(x => x.UserId == userId);
         long walletId = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletid");
 
         if (t == null)
@@ -38,7 +38,7 @@ public class Fund : IFund
                 Status = 1
             };
 
-            await _wallet.Wallets.AddAsync(w);
+            _wallet.Wallets.Add(w);
 
             var wc = new WalletCurrency
             {
@@ -48,11 +48,11 @@ public class Fund : IFund
                 CurrencyId = 1,
                 RegDate = DateTime.Now,
                 Status = 1,
-                WcAddress = GetWcAdress(),
+                WcAddress = Guid.NewGuid().ToString(),
             };
-            await _wallet.WalletCurrencies.AddAsync(wc);
+            _wallet.WalletCurrencies.Add(wc);
 
-            await _wallet.SaveChangesAsync();
+            _wallet.SaveChanges();
 
             return w;
         }
@@ -61,7 +61,7 @@ public class Fund : IFund
     }
 
 
-    public async Task<IEnumerable<WalletCurrencyVM>> GetWalletCurrency(int userId)
+    public IEnumerable<WalletCurrencyVM> GetWalletCurrency(int userId)
     {
 
         var query = @$"SELECT WC.*,
@@ -76,7 +76,7 @@ public class Fund : IFund
 	                    AND WC.""CurrencyId"" = CU.""Id""
 	                    AND CU.""UnitId"" = U.""Id""";
 
-        var dt = await new PostgresDbHelper().RunQuery(query);
+        var dt = new PostgresDbHelper().RunQuery(query);
 
         var res = dt.AsEnumerable<WalletCurrencyVM>();
 
@@ -90,103 +90,161 @@ public class Fund : IFund
     }
 
 
-    public async Task<Transaction?> AddTransaction(Transaction model)
+    public WalletBankAccount? AddBankAccount(WalletBankAccount model)
     {
-        var t = await _wallet.Transactions.FirstOrDefaultAsync(x => x.WalletId == model.WalletId);
-        //Transaction? w = new();
-
-        if (t != null)
-        {
-            //w = new Transaction();
-            //{
-            //    Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
-            //    Info = model.Info,
-            //    OrderId = model.OrderId,
-            //    TrackingCode = model.TrackingCode,
-            //    TransactionDate = model.TransactionDate,
-            //    TransactionModeId = model.TransactionModeId,
-            //    TransactionTypeId = model.TransactionTypeId,
-            //    WalletCurrencyId = model.WalletCurrencyId,
-            //    Status = model.Status
-            //};
-            await _wallet.Transactions.AddAsync(model);
-            await _wallet.SaveChangesAsync();
-
-            return model;
-        }
-
-        return null;
-    }
-
-    public async Task<WalletBankAccount?> AddBankAccount(WalletBankAccount model)
-    {
-        var t = await _wallet.WalletBankAccounts.FirstOrDefaultAsync(x => x.Id == model.Id);
+        var t = _wallet.WalletBankAccounts.FirstOrDefault(x => x.Id == model.Id);
 
         if (t == null)
         {
             var w = new WalletBankAccount();
             w = model;
+            
             w.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_bankaccount");
+            w.RegDate= DateTime.Now;
 
-            await _wallet.WalletBankAccounts.AddAsync(w);
-            await _wallet.SaveChangesAsync();
+            _wallet.WalletBankAccounts.Add(model);
+            _wallet.SaveChanges();
 
             return w;
         }
 
         _wallet.Entry(t).State = EntityState.Modified;
-        await _wallet.SaveChangesAsync();
+        _wallet.SaveChanges();
 
         return t;
     }
 
-    public async Task<WalletBankAccount?> Deposit(TransactionVM model)
+
+    public Transaction? AddTransaction(TransactionVM model)
     {
+
         var t = new Transaction
         {
-            Id= DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
-            OrderId=model.OrderId,
-            Info=model.Info,
-            TrackingCode=model.TrackingCode,
-            TransactionDate=DateTime.Now,
-            TransactionModeId= (short)Enums.TransactionMode.Online,
-            WalletCurrencyId=model.WalletCurrencyId,
-            WalletId=model.WalletId,
-            Status=1,
-            TransactionTypeId=(short)Enums.TransactionType.Deposit
-        }
-
-        if (t == null)
-        {
-            var tr = new TransactionVM();
-            w = model;
-            w.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_bankaccount");
-
-            await _wallet.WalletBankAccounts.AddAsync(w);
-            await _wallet.SaveChangesAsync();
-
-            return w;
-        }
-
-        _wallet.Entry(t).State = EntityState.Modified;
-        await _wallet.SaveChangesAsync();
-
+            Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
+            OrderId = model.OrderId,
+            Info = model.Info,
+            TrackingCode = model.TrackingCode,
+            TransactionDate = DateTime.Now,
+            TransactionModeId = (short)Enums.TransactionMode.Online,
+            WalletCurrencyId = model.WalletCurrencyId,
+            WalletId = model.WalletId,
+            Status = 1,
+            TransactionTypeId = (short)Enums.TransactionType.Deposit
+        };
+        _wallet.Transactions.Add(t);
         return t;
     }
 
-    public async Task<WalletCurrency> AddExchange(Xchenger model)
-    {
 
-        var sourceWallet = await FindWallerCurrencyAsync(model.WalletId, model.SourceWalletCurrency);
-        var destWallet = await FindWallerCurrencyAsync(model.WalletId, model.DestinationWalletCurrency);
+    public WalletCurrency? Deposit(TransactionVM model)
+    {
+        var wallet = FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
 
         using (var context = new GWalletDbContext())
         {
-            using (var transaction = await context.Database.BeginTransactionAsync())
+            using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    _ = await _wallet.Xchengers.AddAsync(model);
+
+                    var t = new Transaction
+                    {
+                        Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
+                        OrderId = model.OrderId,
+                        Info = model.Info,
+                        TrackingCode = model.TrackingCode,
+                        TransactionDate = DateTime.Now,
+                        TransactionModeId = (short)Enums.TransactionMode.Online,
+                        WalletCurrencyId = model.WalletCurrencyId,
+                        WalletId = model.WalletId,
+                        Status = 1,
+                        TransactionTypeId = (short)Enums.TransactionType.Deposit
+                    };
+                    _wallet.Transactions.Add(t);
+
+                    wallet.Amount += model.Amount;
+                    _wallet.WalletCurrencies.Update(wallet);
+
+                    _wallet.SaveChanges();
+                    transaction.Commit();
+
+                    return wallet!;
+                }
+                catch (Exception)
+                {
+                    transaction.Commit();
+                    throw;
+                }
+
+            }
+
+        }
+
+        return null;
+    }
+
+    public WalletCurrency? Windrow(TransactionVM model)
+    {
+        var wallet = FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
+
+        using (var context = new GWalletDbContext())
+        {
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+
+                    var t = new Transaction
+                    {
+                        Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
+                        OrderId = model.OrderId,
+                        Info = model.Info,
+                        TrackingCode = model.TrackingCode,
+                        TransactionDate = DateTime.Now,
+                        TransactionModeId = (short)Enums.TransactionMode.Online,
+                        WalletCurrencyId = model.WalletCurrencyId,
+                        WalletId = model.WalletId,
+                        Status = 1,
+                        TransactionTypeId = (short)Enums.TransactionType.Deposit
+                    };
+                    _wallet.Transactions.Add(t);
+
+                    wallet.Amount -= model.Amount;
+                    _wallet.WalletCurrencies.Update(wallet);
+
+                    _wallet.SaveChanges();
+                    transaction.Commit();
+
+                    return wallet!;
+                }
+                catch (Exception)
+                {
+                    transaction.Commit();
+                    throw;
+                }
+
+            }
+
+        }
+
+        return null;
+    }
+
+    public WalletCurrency AddExchange(Xchenger model)
+    {
+
+        var sourceWallet = FindWallerCurrency(model.WalletId, model.SourceWalletCurrency);
+        var destWallet = FindWallerCurrency(model.WalletId, model.DestinationWalletCurrency);
+
+        using (var context = new GWalletDbContext())
+        {
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    model.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_exchanger");
+
+                    _ = _wallet.Xchengers.Add(model);
 
                     sourceWallet!.Amount -= model.SourceAmount;
                     _wallet.Update(sourceWallet);
@@ -209,20 +267,21 @@ public class Fund : IFund
                             CurrencyId = (short)model.DestinationWalletCurrency,
                             RegDate = DateTime.Now,
                             Status = 1,
-                            WcAddress= GetWcAdress()
+                            WcAddress =  Guid.NewGuid().ToString()
                         };
 
-                        await _wallet.WalletCurrencies.AddAsync(destWallet);
+                        _wallet.WalletCurrencies.Add(destWallet);
 
                     }
 
-                    await _wallet.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                    _wallet.SaveChanges();
+                    transaction.Commit();
+
                     return destWallet!;
                 }
                 catch (Exception)
                 {
-                    await transaction.RollbackAsync();
+                      transaction.Commit();
                     throw;
                 }
 
@@ -233,16 +292,6 @@ public class Fund : IFund
 
     }
 
-    private static string GetWcAdress()
-    {
-        byte[] buffer = Guid.NewGuid().ToByteArray();
-        buffer[0] = 0;
-        buffer[1] = 0;
-        buffer[2] = 0;
-        buffer[3] = 0;
-
-        return new Guid(buffer).ToString();
-    }
 }
 
 

@@ -75,8 +75,8 @@ public class Program
         options.UseNpgsql(builder.Configuration.GetConnectionString("GWalletDbContext"),
 options => options.UseNodaTime()));
 
-     
 
+        builder.Services.AddProblemDetails();
 
         builder.Services.AddScoped<IFund, Fund>();
 
