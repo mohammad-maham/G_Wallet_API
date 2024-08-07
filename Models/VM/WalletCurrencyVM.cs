@@ -18,7 +18,7 @@ public partial class WalletCurrencyVM
 
     public decimal Amount { get; set; }
 
-    public string? WcAddress { get; set; }
+    public string? WC_Address { get; set; }
     public string? Unit { get; set; }
 
     public string? CurrencyName { get; set; }

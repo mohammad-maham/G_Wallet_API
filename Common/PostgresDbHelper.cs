@@ -21,7 +21,7 @@ public class PostgresDbHelper
     {
         using (var connection = GetConnection())
         {
-            connection.OpenAsync();
+            connection.Open();
             using (var command = new NpgsqlCommand(query, connection))
             {
                 using (var adapter = new NpgsqlDataAdapter(command))
