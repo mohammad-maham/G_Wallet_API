@@ -26,14 +26,14 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public    IActionResult GetWallet([FromBody] Wallet model)
+    public IActionResult GetWallet([FromBody] Wallet model)
     {
         try
         {
             if (model.UserId <= 0)
                 return BadRequest(new ApiResponse(500));
 
-            var t =   _fund.GetWallet((int)model.UserId);
+            var t = _fund.GetWallet((int)model.UserId);
 
             if (t != null)
             {
@@ -55,12 +55,12 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult  GetWalletCurrency([FromBody] Wallet model)
+    public IActionResult GetWalletCurrency([FromBody] Wallet model)
     {
         try
         {
 
-            var t =  _fund.GetWalletCurrency((int)model.UserId);
+            var t = _fund.GetWalletCurrency((int)model.UserId);
 
             if (t == null)
                 return BadRequest(new ApiResponse(400));
@@ -85,11 +85,11 @@ public class FundController : ControllerBase
     {
         try
         {
-            var t =  _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
+            var t = _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
             if (t == null)
                 return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
 
-             _fund.Windrow(model);
+            _fund.Windrow(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -109,11 +109,11 @@ public class FundController : ControllerBase
     {
         try
         {
-            var t =  _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
+            var t = _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
             if (t == null)
                 return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
 
-             _fund.Deposit(model);
+            _fund.Deposit(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -134,7 +134,7 @@ public class FundController : ControllerBase
     {
         try
         {
-             _fund.AddTransaction(model);
+            _fund.AddTransaction(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -154,7 +154,7 @@ public class FundController : ControllerBase
     {
         try
         {
-             _fund.AddBankAccount(model);
+            _fund.AddBankAccount(model);
 
             string? jsonData = JsonConvert.SerializeObject(model);
             return Ok(new ApiResponse(data: jsonData));
@@ -176,17 +176,17 @@ public class FundController : ControllerBase
 
         try
         {
-            var t =  _fund.FindWallerCurrency(model.WalletId, model.SourceWalletCurrency);
+            var t = _fund.FindWallerCurrency(model.WalletId, model.SourceWalletCurrency);
             if (t == null)
                 return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
 
             if (t.Amount < model.SourceAmount)
                 return BadRequest(new ApiResponse { Message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد." });
 
-            var exchange =  _fund.AddExchange(model);
+            var exchange = _fund.AddExchange(model);
 
             if (exchange != null)
-                return Ok(new ApiResponse());
+                return Ok(new ApiResponse { StatusCode = 200, Data = JsonConvert.SerializeObject("true") });
 
             return BadRequest(new ApiResponse(500));
         }
