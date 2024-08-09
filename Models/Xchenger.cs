@@ -8,17 +8,17 @@ public partial class Xchenger
 {
     public long Id { get; set; }
 
-    public string? SourceAddress { get; set; } = null!;
+    public string? SourceAddress { get; set; }
 
-    public string? DestinationAddress { get; set; } = null!;
+    public string? DestinationAddress { get; set; }
 
-    public short SourceWalletCurrency { get; set; }
+    public long SourceWalletCurrency { get; set; }
 
-    public short DestinationWalletCurrency { get; set; }
+    public long DestinationWalletCurrency { get; set; }
 
     public decimal SourceAmount { get; set; }
 
-    public DateTime ExChangeData { get; set; }
+    public Instant ExChangeData { get; set; }
 
     public long RegUserId { get; set; }
 
@@ -26,5 +26,5 @@ public partial class Xchenger
 
     public decimal DestinationAmout { get; set; }
 
-    public long WalletId { get; set; }
+    public long? WalletId { get; set; }
 }

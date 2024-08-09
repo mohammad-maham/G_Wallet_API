@@ -19,5 +19,4 @@ public partial class WalletCurrency
     public decimal Amount { get; set; }
 
     public string? WcAddress { get; set; }
-
 }

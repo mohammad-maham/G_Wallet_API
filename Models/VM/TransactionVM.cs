@@ -23,5 +23,14 @@
         public string? TrackingCode { get; set; }
 
         public decimal Amount { get; set; }
+
+
+        public short CurrencyId { get; set; }
+
+
+        public DateTime RegDate { get; set; }
+
+
+        public string? WcAddress { get; set; }
     }
 }
