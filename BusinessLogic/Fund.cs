@@ -53,6 +53,14 @@ public class Fund : IFund
             };
             _wallet.WalletCurrencies.Add(wc);
 
+            var wcGold = new WalletCurrency();
+            wcGold = wc;
+
+            wcGold.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletcurrency");
+            wcGold.CurrencyId = 2;
+           
+            _wallet.WalletCurrencies.Add(wcGold);
+
             _wallet.SaveChanges();
 
             return w;
