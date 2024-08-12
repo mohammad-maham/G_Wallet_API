@@ -86,7 +86,7 @@ public class FundController : ControllerBase
     {
         try
         {
-            if (model.UserId <= 0 )
+            if (model.UserId <= 0)
                 return BadRequest(new ApiResponse(500));
 
             var w = _fund.GetWallet((int)model.UserId);
@@ -219,7 +219,7 @@ public class FundController : ControllerBase
     {
         try
         {
-            var t = _wallet.WalletBankAccounts.FirstOrDefault(x => x.BankAccountNumber == model.BankAccountNumber && x.BankId==model.BankId);
+            var t = _wallet.WalletBankAccounts.FirstOrDefault(x => x.BankAccountNumber == model.BankAccountNumber && x.BankId == model.BankId);
 
             if (t != null)
                 return BadRequest(new ApiResponse { StatusCode = 400, Message = "این حساب قبلا ثبت شده است." });
@@ -247,7 +247,7 @@ public class FundController : ControllerBase
     {
         try
         {
-            var t = _wallet.WalletBankAccounts.FirstOrDefault(x => x.Id == model.Id );
+            var t = _wallet.WalletBankAccounts.Find(model.Id);
 
             if (t == null)
                 return BadRequest(new ApiResponse { StatusCode = 400, Message = "حساب بانکی مورد نظر یافت نشد." });
