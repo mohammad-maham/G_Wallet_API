@@ -12,7 +12,7 @@ public partial class WalletBankAccount
 
     public int? BankId { get; set; }
 
-    public long? BankAccountNumber { get; set; }
+    public string? BankAccountNumber { get; set; }
 
     public int? RegionId { get; set; }
 
