@@ -8,6 +8,7 @@ public partial class WalletBankAccountVM
 {
     public long Id { get; set; }
 
+    public string? Name{ get; set; }
     public long WalletId { get; set; }
 
     public int BankId { get; set; }

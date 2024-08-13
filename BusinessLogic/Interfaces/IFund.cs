@@ -1,5 +1,6 @@
 ﻿using G_Wallet_API.Models;
 using G_Wallet_API.Models.VM;
+using System.Data;
 
 namespace G_Wallet_API.BusinessLogic.Interfaces;
 
@@ -15,7 +16,7 @@ public interface IFund
     IEnumerable<WalletCurrencyVM> GetWalletCurrency(int userId);
 
     WalletCurrency? FindWallerCurrency(long walletId, long currencyId);
-    IEnumerable<WalletBankAccountVM> GetBankAccounts(int walletId);
+    DataTable GetBankAccounts(int walletId);
 
     WalletBankAccount? ToggleBankCard(WalletBankAccount model);
 

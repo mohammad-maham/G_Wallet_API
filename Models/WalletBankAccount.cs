@@ -6,8 +6,9 @@ namespace G_Wallet_API.Models;
 
 public partial class WalletBankAccount
 {
-    public long Id { get; set; }
+    public long? Id { get; set; }
 
+    public string? Name { get; set; }
     public long? WalletId { get; set; }
 
     public int? BankId { get; set; }

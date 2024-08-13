@@ -4,6 +4,7 @@ using G_Wallet_API.Models;
 using G_Wallet_API.Models.VM;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Data;
 
 namespace G_Wallet_API.BusinessLogic;
 
@@ -98,7 +99,7 @@ public class Fund : IFund
         return res;
     }
 
-    public IEnumerable<WalletBankAccountVM> GetBankAccounts(int walletId)
+    public DataTable GetBankAccounts(int walletId)
     {
 
         var query = @$"SELECT *
@@ -109,9 +110,9 @@ public class Fund : IFund
 
         var dt = new PostgresDbHelper().RunQuery(query);
 
-        var res = dt.AsEnumerable<WalletBankAccountVM>();
+        //var res = dt.AsEnumerable<WalletBankAccountVM>();
 
-        return res;
+        return dt;
     }
 
     public WalletBankAccount? AddBankAccount(WalletBankAccount model)
@@ -120,6 +121,7 @@ public class Fund : IFund
         {
             Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_bankaccount1"),
             BankId = model.BankId,
+            Name=model.Name,
             BankAccountNumber = model.BankAccountNumber,
             Status = 1,
             OrderId = model.OrderId,
