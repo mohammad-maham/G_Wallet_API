@@ -18,7 +18,7 @@ public partial class Xchenger
 
     public decimal SourceAmount { get; set; }
 
-    public Instant ExChangeData { get; set; }
+    public DateTime   ExChangeData { get; set; }
 
     public long RegUserId { get; set; }
 
