@@ -113,6 +113,35 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
+    public IActionResult GetFinancialReport([FromBody] Wallet model)
+    {
+        try
+        {
+            if (model.UserId <= 0)
+                return BadRequest(new ApiResponse(500));
+
+            var res = _fund.GetFinancialReport((int)model.UserId);
+
+            if (res != null)
+            {
+                string? jsonData = JsonConvert.SerializeObject(res);
+                return Ok(new ApiResponse(data: jsonData));
+            }
+
+            return BadRequest(new ApiResponse(500));
+
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine(e.Message);
+            throw;
+
+        }
+    }
+
+    [HttpPost]
+    [Route("[action]")]
     public IActionResult GetBankAccounts(Wallet model)
     {
         try
@@ -286,6 +315,37 @@ public class FundController : ControllerBase
                 return Ok(new ApiResponse { StatusCode = 200, Data = JsonConvert.SerializeObject("true") });
 
             return BadRequest(new ApiResponse(500));
+        }
+        catch (Exception e)
+        {
+
+            Console.WriteLine(e.Message);
+            throw;
+
+        }
+    }
+
+    [HttpPost]
+    [Route("[action]")]
+    public IActionResult GetExchanges([FromBody] Wallet model)
+    {
+        try
+        {
+            if (model.UserId <= 0)
+                return BadRequest(new ApiResponse(500));
+
+            var w = _fund.GetWallet((int)model.UserId);
+
+            var t = _fund.GetExchanges((int)w.Id);
+
+            if (t != null)
+            {
+                string? jsonData = JsonConvert.SerializeObject(t);
+                return Ok(new ApiResponse(data: jsonData));
+            }
+
+            return BadRequest(new ApiResponse(500));
+
         }
         catch (Exception e)
         {

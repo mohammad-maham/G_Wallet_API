@@ -27,4 +27,5 @@ public partial class WalletBankAccountVM
     public short OrderId { get; set; }
 
     public string? ValidationInfo { get; set; }
+    public string? Name { get; set; }
 }

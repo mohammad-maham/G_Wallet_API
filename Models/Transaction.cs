@@ -25,4 +25,7 @@ public partial class Transaction
     public string? OrderId { get; set; }
 
     public string? TrackingCode { get; set; }
+
+    public decimal? Amount { get; set; }
+
 }
