@@ -58,7 +58,7 @@ public class Fund : IFund
 
             wcGold.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletcurrency");
             wcGold.CurrencyId = 2;
-           
+
             _wallet.WalletCurrencies.Add(wcGold);
 
             _wallet.SaveChanges();
@@ -334,6 +334,47 @@ public class Fund : IFund
     public List<Transaction?> GetTransaction(Wallet model)
     {
         var t = _wallet.Transactions.Where(x => x.WalletId == model.Id).ToList();
+        return t;
+    }
+
+    public IEnumerable<FinancialVM> GetFinancialReport(int userId)
+    {
+        var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == userId);
+
+        var tr = _wallet.Transactions.Where(x => x.WalletId == w.Id)
+            .Select(x => new FinancialVM
+            {
+                Id = x.Id,
+                SourceAmount = (decimal)(x.Amount != null ? x.Amount : 0),
+                SourceWalletCurrency = x.WalletCurrencyId,
+                TransactionDate = x.TransactionDate,
+                WalletId = x.WalletId,
+                TransactionTypeId = x.TransactionTypeId,
+
+            }).ToList();
+
+        var xc = _wallet.Xchengers.Where(x => x.WalletId == w.Id)
+             .Select(x => new FinancialVM
+             {
+                 Id = x.Id,
+                 SourceAmount = x.SourceAmount,
+                 DestinationAmout = x.DestinationAmout,
+                 SourceWalletCurrency = x.SourceWalletCurrency,
+                 DestinationWalletCurrency = x.DestinationWalletCurrency,
+                 TransactionDate = x.ExChangeData,
+                 WalletId = (long)x.WalletId!,
+                 TransactionTypeId = 5,
+             }).ToList();
+
+        var res = tr.Union(xc).Distinct();
+
+        return res;
+    }
+
+    public IEnumerable<Xchenger> GetExchanges(int walletId)
+    {
+
+        var t = _wallet.Xchengers.Where(x => x.WalletId == walletId).ToList();
         return t;
     }
 }

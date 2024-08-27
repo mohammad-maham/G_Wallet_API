@@ -18,5 +18,7 @@ public interface IFund
     IEnumerable<WalletBankAccountVM> GetBankAccounts(int walletId);
 
     WalletBankAccount? ToggleBankCard(WalletBankAccount model);
+      IEnumerable<FinancialVM> GetFinancialReport( int userId);
+    IEnumerable<Xchenger> GetExchanges(int walletId);
 
 }
