@@ -82,7 +82,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult GetTransactions([FromBody] Wallet model)
+    public IActionResult GetTransactions([FromBody] FilterVM model)
     {
         try
         {
@@ -91,7 +91,8 @@ public class FundController : ControllerBase
 
             var w = _fund.GetWallet((int)model.UserId);
 
-            var t = _fund.GetTransaction(w);
+            model.WalletId = w.Id;
+            var t = _fund.GetTransaction(model);
 
             if (t != null)
             {
@@ -113,14 +114,14 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult GetFinancialReport([FromBody] Wallet model)
+    public IActionResult GetFinancialReport([FromBody] FilterVM model)
     {
         try
         {
             if (model.UserId <= 0)
                 return BadRequest(new ApiResponse(500));
 
-            var res = _fund.GetFinancialReport((int)model.UserId);
+            var res = _fund.GetFinancialReport(model);
 
             if (res != null)
             {
@@ -327,7 +328,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult GetExchanges([FromBody] Wallet model)
+    public IActionResult GetExchanges([FromBody] FilterVM model)
     {
         try
         {
@@ -336,7 +337,8 @@ public class FundController : ControllerBase
 
             var w = _fund.GetWallet((int)model.UserId);
 
-            var t = _fund.GetExchanges((int)w.Id);
+            model.WalletId = w.Id;
+            var t = _fund.GetExchanges(model);
 
             if (t != null)
             {

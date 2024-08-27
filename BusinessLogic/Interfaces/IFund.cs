@@ -8,7 +8,6 @@ public interface IFund
     WalletCurrency? Deposit(TransactionVM model);
     WalletCurrency? Windrow(WalletCurrency model);
     Transaction? AddTransaction(TransactionVM model);
-    List<Transaction?> GetTransaction(Wallet model);
     Wallet? GetWallet(int userId);
     WalletBankAccount? AddBankAccount(WalletBankAccount model);
     WalletCurrency AddExchange(Xchenger model);
@@ -18,7 +17,8 @@ public interface IFund
     IEnumerable<WalletBankAccountVM> GetBankAccounts(int walletId);
 
     WalletBankAccount? ToggleBankCard(WalletBankAccount model);
-      IEnumerable<FinancialVM> GetFinancialReport( int userId);
-    IEnumerable<Xchenger> GetExchanges(int walletId);
+    IEnumerable<ReportVM> GetFinancialReport(FilterVM model);
+    IEnumerable<ReportVM> GetExchanges(FilterVM model);
+    IEnumerable<ReportVM?> GetTransaction(FilterVM model);
 
 }

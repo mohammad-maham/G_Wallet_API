@@ -4,6 +4,8 @@ using G_Wallet_API.Models;
 using G_Wallet_API.Models.VM;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace G_Wallet_API.BusinessLogic;
 
@@ -207,7 +209,7 @@ public class Fund : IFund
                     };
                     _wallet.Transactions.Add(t);
 
-                    wallet.Amount += model.Amount;
+                    wallet!.Amount += model.Amount;
                     _wallet.WalletCurrencies.Update(wallet);
 
                     _wallet.SaveChanges();
@@ -331,37 +333,58 @@ public class Fund : IFund
 
     }
 
-    public List<Transaction?> GetTransaction(Wallet model)
+    public IEnumerable<ReportVM> GetTransaction(FilterVM model)
     {
-        var t = _wallet.Transactions.Where(x => x.WalletId == model.Id).ToList();
+        var t = _wallet.Transactions.Where(x => x.WalletId == model.WalletId &&
+            (x.WalletCurrencyId == model.CurrencyId || model.CurrencyId == null) &&
+            (x.TransactionModeId == model.TransactionModeId || model.TransactionModeId == null) &&
+            (x.TransactionTypeId == model.TransactionTypeId || model.TransactionTypeId == null) &&
+            (x.TransactionDate <= model.FromDate || model.FromDate == null) &&
+            (x.TransactionDate >= model.ToDate || model.ToDate == null))
+            .SelectMany(tr => _wallet.TransactionTypes.Where(x => x.Id == tr.TransactionTypeId).DefaultIfEmpty(), (trans, transType) => new { trans, transType })
+            .SelectMany(tm => _wallet.TransactionModes.Where(x => x.Id == tm.trans.TransactionModeId).DefaultIfEmpty(), (tm, transMode) => new { tm, transMode })
+            .SelectMany(cu => _wallet.Currencies.Where(x => x.Id == cu.tm.trans.WalletCurrencyId).DefaultIfEmpty(), (cu, currency) => new { cu, currency })
+            .Select(x => new ReportVM()
+            {
+                Id = x.cu.tm.trans.Id,
+                Amount = x.cu.tm.trans.Amount,
+                RepDate = ConvertToPersianDate(x.cu.tm.trans.TransactionDate),
+                WalletId = x.cu.tm.trans.WalletId,
+                SourceWalletCurrencyId = x.cu.tm.trans.WalletCurrencyId,
+                TransactionTypeId = x.cu.tm.trans.TransactionTypeId,
+                TransactionModeId = x.cu.tm.trans.TransactionModeId,
+                SourceWalletCurrency = x.currency!.Name,
+                TransactionType = x.cu.tm.transType!.Name,
+                TransactionMode = x.cu.transMode!.Name,
+            }).ToList();
         return t;
     }
 
-    public IEnumerable<FinancialVM> GetFinancialReport(int userId)
+    public IEnumerable<ReportVM> GetFinancialReport(FilterVM model)
     {
-        var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == userId);
+        var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == model.UserId);
 
         var tr = _wallet.Transactions.Where(x => x.WalletId == w.Id)
-            .Select(x => new FinancialVM
+            .Select(x => new ReportVM
             {
                 Id = x.Id,
                 SourceAmount = (decimal)(x.Amount != null ? x.Amount : 0),
-                SourceWalletCurrency = x.WalletCurrencyId,
-                TransactionDate = x.TransactionDate,
+                SourceWalletCurrencyId = x.WalletCurrencyId,
+                RepDate = ConvertToPersianDate(x.TransactionDate),
                 WalletId = x.WalletId,
                 TransactionTypeId = x.TransactionTypeId,
 
             }).ToList();
 
         var xc = _wallet.Xchengers.Where(x => x.WalletId == w.Id)
-             .Select(x => new FinancialVM
+             .Select(x => new ReportVM
              {
                  Id = x.Id,
                  SourceAmount = x.SourceAmount,
                  DestinationAmout = x.DestinationAmout,
-                 SourceWalletCurrency = x.SourceWalletCurrency,
-                 DestinationWalletCurrency = x.DestinationWalletCurrency,
-                 TransactionDate = x.ExChangeData,
+                 SourceWalletCurrencyId = x.SourceWalletCurrency,
+                 DestinationWalletCurrencyId = x.DestinationWalletCurrency,
+                 RepDate = ConvertToPersianDate(x.ExChangeData),
                  WalletId = (long)x.WalletId!,
                  TransactionTypeId = 5,
              }).ToList();
@@ -371,11 +394,24 @@ public class Fund : IFund
         return res;
     }
 
-    public IEnumerable<Xchenger> GetExchanges(int walletId)
+    public IEnumerable<ReportVM> GetExchanges(FilterVM model)
     {
 
-        var t = _wallet.Xchengers.Where(x => x.WalletId == walletId).ToList();
+        var t = _wallet.Xchengers
+            .Where(x => x.WalletId == model.WalletId &&
+            (x.ExChangeData <= model.FromDate || model.FromDate == null))
+            .ToList().Select(x=> new ReportVM
+            {
+                RepDate=ConvertToPersianDate(x.ExChangeData)
+            });
+
         return t;
+    }
+
+    private string ConvertToPersianDate(DateTime date)
+    {
+        string persianDateString = date.ToString("yyyy/MM/dd HH:mm:ss", new CultureInfo("fa-IR"));
+        return persianDateString;
     }
 }
 
