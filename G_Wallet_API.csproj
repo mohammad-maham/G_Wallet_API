@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\irKish\**" />
+    <Content Remove="Models\irKish\**" />
+    <EmbeddedResource Remove="Models\irKish\**" />
+    <None Remove="Models\irKish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Common\ExceptionMiddleware.cs" />
   </ItemGroup>
 
