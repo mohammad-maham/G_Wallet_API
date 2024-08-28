@@ -335,29 +335,31 @@ public class Fund : IFund
 
     public IEnumerable<ReportVM> GetTransaction(FilterVM model)
     {
-        var t = _wallet.Transactions.Where(x => x.WalletId == model.WalletId &&
-            (x.WalletCurrencyId == model.CurrencyId || model.CurrencyId == null) &&
-            (x.TransactionModeId == model.TransactionModeId || model.TransactionModeId == null) &&
-            (x.TransactionTypeId == model.TransactionTypeId || model.TransactionTypeId == null) &&
-            (x.TransactionDate <= model.FromDate || model.FromDate == null) &&
-            (x.TransactionDate >= model.ToDate || model.ToDate == null))
-            .SelectMany(tr => _wallet.TransactionTypes.Where(x => x.Id == tr.TransactionTypeId).DefaultIfEmpty(), (trans, transType) => new { trans, transType })
-            .SelectMany(tm => _wallet.TransactionModes.Where(x => x.Id == tm.trans.TransactionModeId).DefaultIfEmpty(), (tm, transMode) => new { tm, transMode })
-            .SelectMany(cu => _wallet.Currencies.Where(x => x.Id == cu.tm.trans.WalletCurrencyId).DefaultIfEmpty(), (cu, currency) => new { cu, currency })
-            .Select(x => new ReportVM()
-            {
-                Id = x.cu.tm.trans.Id,
-                Amount = x.cu.tm.trans.Amount,
-                RepDate = ConvertToPersianDate(x.cu.tm.trans.TransactionDate),
-                WalletId = x.cu.tm.trans.WalletId,
-                SourceWalletCurrencyId = x.cu.tm.trans.WalletCurrencyId,
-                TransactionTypeId = x.cu.tm.trans.TransactionTypeId,
-                TransactionModeId = x.cu.tm.trans.TransactionModeId,
-                SourceWalletCurrency = x.currency!.Name,
-                TransactionType = x.cu.tm.transType!.Name,
-                TransactionMode = x.cu.transMode!.Name,
-            }).ToList();
-        return t;
+        var t = _wallet.Transactions.Where(x => x.WalletId == model.WalletId)
+        .SelectMany(tr => _wallet.TransactionTypes.Where(x => x.Id == tr.TransactionTypeId).DefaultIfEmpty(), (trans, transType) => new { trans, transType })
+        .SelectMany(cu => _wallet.Currencies.Where(x => x.Id == cu.trans.WalletCurrencyId).DefaultIfEmpty(), (cu, currency) => new { cu, currency }).ToList();
+
+        if (model.FromDate != null)
+            t = t.Where(x => x.cu.trans.TransactionDate >= model.FromDate).ToList();
+
+        if (model.ToDate != null)
+            t = t.Where(x => x.cu.trans.TransactionDate <= model.ToDate).ToList();
+
+        var res = t
+          .Select(x => new ReportVM()
+          {
+              Id = x.cu.trans.Id,
+              Amount = x.cu.trans.Amount !=null ? x.cu.trans.Amount : 0,
+              RepDate = ConvertToPersianDate(x.cu.trans.TransactionDate),
+              WalletId = x.cu.trans.WalletId,
+              SourceWalletCurrencyId = x.cu.trans.WalletCurrencyId,
+              TransactionTypeId = x.cu.trans.TransactionTypeId,
+              TransactionModeId = x.cu.trans.TransactionModeId,
+              SourceWalletCurrency=x.currency.Name,
+              TransactionType=x.cu.transType.Name
+          }).ToList();
+
+        return res;
     }
 
     public IEnumerable<ReportVM> GetFinancialReport(FilterVM model)
@@ -400,9 +402,9 @@ public class Fund : IFund
         var t = _wallet.Xchengers
             .Where(x => x.WalletId == model.WalletId &&
             (x.ExChangeData <= model.FromDate || model.FromDate == null))
-            .ToList().Select(x=> new ReportVM
+            .ToList().Select(x => new ReportVM
             {
-                RepDate=ConvertToPersianDate(x.ExChangeData)
+                RepDate = ConvertToPersianDate(x.ExChangeData)
             });
 
         return t;
