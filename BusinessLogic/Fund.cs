@@ -4,6 +4,7 @@ using G_Wallet_API.Models;
 using G_Wallet_API.Models.VM;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -162,27 +163,100 @@ public class Fund : IFund
 
     }
 
-    public Transaction? AddTransaction(TransactionVM model)
+    public TransactionVM AddTransaction(TransactionVM model)
     {
+        var tranactionId = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid");
         var t = new Transaction
         {
-            Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
-            OrderId = model.OrderId,
-            Info = JsonConvert.SerializeObject(model.Info),
+            Id = tranactionId,
+            //OrderId = model.OrderId,
+            //Info = JsonConvert.SerializeObject(model.Info),
             TrackingCode = model.TrackingCode,
             TransactionDate = DateTime.Now,
-            TransactionModeId = (short)Enums.TransactionMode.Online,
+            TransactionModeId = (short)model.TransactionModeId,
             WalletCurrencyId = model.WalletCurrencyId,
             WalletId = model.WalletId,
             Status = 1,
-            TransactionTypeId = (short)Enums.TransactionType.Deposit
+            TransactionTypeId = (short)model.TransactionTypeId,
+            Amount = model.Amount
         };
         _wallet.Transactions.Add(t);
+
+        var transConfirmId = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transconfirm");
+        var trc = new TransactionConfirmation
+        {
+            Id = transConfirmId,
+            //ConfirmationDate = DateTime.Now,
+            TransactionId = tranactionId,
+            RequestDescription = model.RequestDescription,
+            ResponceDescription = model.ResponceDescription,
+            Status = 0,
+            TransactionInfo = JsonConvert.SerializeObject(model.TransactionInfo)
+        };
+        _wallet.TransactionConfirmations.Add(trc);
+
         _wallet.SaveChanges();
-        return t;
+
+        var tvm = new TransactionVM
+        {
+            Id = tranactionId,
+            TransactionConfirmId = transConfirmId,
+            Amount = t.Amount,
+            WalletId = t.WalletId,
+            WalletCurrencyId = t.WalletCurrencyId,
+            Status = trc.Status,
+        };
+        return tvm;
     }
 
-    public WalletCurrency? Deposit(TransactionVM model)
+    //public WalletCurrency? Deposit(TransactionVM model)
+    //{
+    //    var wallet = FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
+
+    //    using (var context = new GWalletDbContext())
+    //    {
+    //        using (var transaction = context.Database.BeginTransaction())
+    //        {
+    //            try
+    //            {
+
+    //                var t = new Transaction
+    //                {
+    //                    Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
+    //                    OrderId = model.OrderId,
+    //                    Info = JsonConvert.SerializeObject(model.Info),
+    //                    TrackingCode = model.TrackingCode,
+    //                    TransactionDate = DateTime.Now,
+    //                    TransactionModeId = (short)Enums.TransactionMode.Online,
+    //                    WalletCurrencyId = model.WalletCurrencyId,
+    //                    WalletId = model.WalletId,
+    //                    Status = 1,
+    //                    TransactionTypeId = (short)Enums.TransactionType.Deposit,
+
+    //                };
+    //                _wallet.Transactions.Add(t);
+
+    //                wallet!.Amount += model.Amount;
+    //                _wallet.WalletCurrencies.Update(wallet);
+
+    //                _wallet.SaveChanges();
+    //                transaction.Commit();
+
+    //                return wallet!;
+    //            }
+    //            catch (Exception)
+    //            {
+    //                transaction.Commit();
+    //                throw;
+    //            }
+
+    //        }
+
+    //    }
+
+    //}
+
+    public WalletCurrency? ConfirmTransaction(TransactionVM model)
     {
         var wallet = FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
 
@@ -192,67 +266,15 @@ public class Fund : IFund
             {
                 try
                 {
+                    var trc = _wallet.TransactionConfirmations.FirstOrDefault(x => x.Id == model.TransactionConfirmId);
+                    trc.Status = 1;
+                    trc.ConfirmationDate = DateTime.Now;
+                    trc.ResponceDescription = model.ResponceDescription;
+                    trc.ConfirmationUserId = model.ConfirmationUserId;
+                    trc.TransactionInfo = model.TransactionInfo;
+                    _wallet.TransactionConfirmations.Update(trc);
 
-                    var t = new Transaction
-                    {
-                        Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
-                        OrderId = model.OrderId,
-                        Info = JsonConvert.SerializeObject(model.Info),
-                        TrackingCode = model.TrackingCode,
-                        TransactionDate = DateTime.Now,
-                        TransactionModeId = (short)Enums.TransactionMode.Online,
-                        WalletCurrencyId = model.WalletCurrencyId,
-                        WalletId = model.WalletId,
-                        Status = 1,
-                        TransactionTypeId = (short)Enums.TransactionType.Deposit,
-
-                    };
-                    _wallet.Transactions.Add(t);
-
-                    wallet!.Amount += model.Amount;
-                    _wallet.WalletCurrencies.Update(wallet);
-
-                    _wallet.SaveChanges();
-                    transaction.Commit();
-
-                    return wallet!;
-                }
-                catch (Exception)
-                {
-                    transaction.Commit();
-                    throw;
-                }
-
-            }
-
-        }
-
-    }
-
-    public WalletCurrency? Windrow(WalletCurrency model)
-    {
-        var wallet = FindWallerCurrency(model.WalletId, model.CurrencyId);
-
-        using (var context = new GWalletDbContext())
-        {
-            using (var transaction = context.Database.BeginTransaction())
-            {
-                try
-                {
-
-                    var t = new Transaction
-                    {
-                        Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_transactionid"),
-                        TransactionDate = DateTime.Now,
-                        TransactionModeId = (short)Enums.TransactionMode.Online,
-                        WalletCurrencyId = model.CurrencyId,
-                        WalletId = model.WalletId,
-                        Status = 1,
-                        TransactionTypeId = (short)Enums.TransactionType.Windrow
-                    };
-                    _wallet.Transactions.Add(t);
-
-                    wallet.Amount -= model.Amount;
+                    wallet.Amount += model.Amount;
                     _wallet.WalletCurrencies.Update(wallet);
 
                     _wallet.SaveChanges();
@@ -335,63 +357,52 @@ public class Fund : IFund
 
     public IEnumerable<ReportVM> GetTransaction(FilterVM model)
     {
-        var t = _wallet.Transactions.Where(x => x.WalletId == model.WalletId)
-        .SelectMany(tr => _wallet.TransactionTypes.Where(x => x.Id == tr.TransactionTypeId).DefaultIfEmpty(), (trans, transType) => new { trans, transType })
-        .SelectMany(cu => _wallet.Currencies.Where(x => x.Id == cu.trans.WalletCurrencyId).DefaultIfEmpty(), (cu, currency) => new { cu, currency }).ToList();
+        var transactions = _wallet.Transactions.ToList();
+
+        if (model.UserId != null)
+        {
+            var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == model.UserId);
+            transactions = transactions.Where(x => x.WalletId == w.Id).ToList();
+        }
+
+        if (model.TransactionTypeId != null)
+            transactions = transactions.Where(x => x.TransactionTypeId == model.TransactionTypeId).ToList();
+
+        if (model.TransactionModeId != null)
+            transactions = transactions.Where(x => x.TransactionModeId == model.TransactionModeId).ToList();
 
         if (model.FromDate != null)
-            t = t.Where(x => x.cu.trans.TransactionDate >= model.FromDate).ToList();
+            transactions = transactions.Where(x => x.TransactionDate >= model.FromDate).ToList();
 
         if (model.ToDate != null)
-            t = t.Where(x => x.cu.trans.TransactionDate <= model.ToDate).ToList();
+            transactions = transactions.Where(x => x.TransactionDate <= model.ToDate).ToList();
 
-        var res = t
-          .Select(x => new ReportVM()
-          {
-              Id = x.cu.trans.Id,
-              Amount = x.cu.trans.Amount !=null ? x.cu.trans.Amount : 0,
-              RepDate = ConvertToPersianDate(x.cu.trans.TransactionDate),
-              WalletId = x.cu.trans.WalletId,
-              SourceWalletCurrencyId = x.cu.trans.WalletCurrencyId,
-              TransactionTypeId = x.cu.trans.TransactionTypeId,
-              TransactionModeId = x.cu.trans.TransactionModeId,
-              SourceWalletCurrency=x.currency.Name,
-              TransactionType=x.cu.transType.Name
-          }).ToList();
+        var t = transactions
+            .SelectMany(tr => _wallet.TransactionConfirmations.Where(tf => tf != null && tf.TransactionId == tr.Id)
+            .DefaultIfEmpty(), (tr, tf) => new { tr, tf })
+            .ToList();
 
-        return res;
-    }
-
-    public IEnumerable<ReportVM> GetFinancialReport(FilterVM model)
-    {
-        var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == model.UserId);
-
-        var tr = _wallet.Transactions.Where(x => x.WalletId == w.Id)
-            .Select(x => new ReportVM
-            {
-                Id = x.Id,
-                SourceAmount = (decimal)(x.Amount != null ? x.Amount : 0),
-                SourceWalletCurrencyId = x.WalletCurrencyId,
-                RepDate = ConvertToPersianDate(x.TransactionDate),
-                WalletId = x.WalletId,
-                TransactionTypeId = x.TransactionTypeId,
-
-            }).ToList();
-
-        var xc = _wallet.Xchengers.Where(x => x.WalletId == w.Id)
-             .Select(x => new ReportVM
-             {
-                 Id = x.Id,
-                 SourceAmount = x.SourceAmount,
-                 DestinationAmout = x.DestinationAmout,
-                 SourceWalletCurrencyId = x.SourceWalletCurrency,
-                 DestinationWalletCurrencyId = x.DestinationWalletCurrency,
-                 RepDate = ConvertToPersianDate(x.ExChangeData),
-                 WalletId = (long)x.WalletId!,
-                 TransactionTypeId = 5,
-             }).ToList();
-
-        var res = tr.Union(xc).Distinct();
+        var res = t.Select(x => new ReportVM()
+        {
+            Id = x.tr.Id,
+            SourceAmount = x.tr.Amount != null ? x.tr.Amount : 0,
+            RepDate = ConvertToPersianDate(x.tr.TransactionDate),
+            WalletId = x.tr.WalletId,
+            SourceWalletCurrencyId = x.tr.WalletCurrencyId,
+            TransactionTypeId = x.tr.TransactionTypeId,
+            TransactionModeId = x.tr.TransactionModeId,
+            SourceWalletCurrency = GetCurrencyType(x.tr.WalletCurrencyId),
+            TransactionType = GetTransactionType(x.tr.TransactionTypeId),
+            TransactionMode = GetTransactionMode(x.tr.TransactionModeId),
+            ConfirmationUserId = x.tf?.ConfirmationUserId ?? -1,
+            TransactionConfirmId = x.tf?.Id ?? -1,
+            RequestDescription = x.tf?.RequestDescription ?? "",
+            ResponceDescription = x.tf?.ResponceDescription ?? "",
+            TransactionInfo = x.tf?.TransactionInfo ?? "",
+            Status = x.tf?.Status ?? 0,
+            ConfirmationDate = ConvertToPersianDate(x.tf?.ConfirmationDate ?? null),
+            UserId = model.UserId
+        }).ToList();
 
         return res;
     }
@@ -399,21 +410,170 @@ public class Fund : IFund
     public IEnumerable<ReportVM> GetExchanges(FilterVM model)
     {
 
-        var t = _wallet.Xchengers
-            .Where(x => x.WalletId == model.WalletId &&
-            (x.ExChangeData <= model.FromDate || model.FromDate == null))
-            .ToList().Select(x => new ReportVM
-            {
-                RepDate = ConvertToPersianDate(x.ExChangeData)
-            });
+        var t = _wallet.Xchengers.Where(x => x.WalletId == model.WalletId).ToList();
 
-        return t;
+        if (model.FromDate != null)
+            t = t.Where(x => x.ExChangeData >= model.FromDate).ToList();
+
+        if (model.ToDate != null)
+            t = t.Where(x => x.ExChangeData <= model.ToDate).ToList();
+
+        var res = t.Select(x => new ReportVM()
+        {
+            Id = x.Id,
+            SourceAmount = x.SourceAmount,
+            DestinationAmout = x.DestinationAmout,
+            RepDate = ConvertToPersianDate(x.ExChangeData),
+            WalletId = x.WalletId,
+            TransactionType = GetExchangeType(x.SourceWalletCurrency),
+            SourceWalletCurrencyId = x.SourceWalletCurrency,
+            DestinationWalletCurrencyId = x.DestinationWalletCurrency,
+            UserId = x.RegUserId
+        }).ToList();
+
+        return res;
     }
 
-    private string ConvertToPersianDate(DateTime date)
+    public IEnumerable<ReportVM> GetFinancialReport(FilterVM model)
     {
-        string persianDateString = date.ToString("yyyy/MM/dd HH:mm:ss", new CultureInfo("fa-IR"));
-        return persianDateString;
+
+        var transactions = _wallet.Transactions.ToList();
+        var xchanges = _wallet.Xchengers.ToList();
+
+        if (model.UserId != null)
+        {
+            var w = _wallet.Wallets.FirstOrDefault(x => x.UserId == model.UserId);
+
+            transactions = transactions.Where(x => x.WalletId == w.Id).ToList();
+            xchanges = xchanges.Where(x => x.WalletId == w.Id).ToList();
+        }
+
+        if (model.TransactionTypeId != null)
+            transactions = transactions.Where(x => x.TransactionTypeId == model.TransactionTypeId).ToList();
+
+        if (model.TransactionModeId != null)
+            transactions = transactions.Where(x => x.TransactionModeId == model.TransactionModeId).ToList();
+
+        if (model.FromDate != null)
+        {
+            transactions = transactions.Where(x => x.TransactionDate >= model.FromDate).ToList();
+            xchanges = xchanges.Where(x => x.ExChangeData <= model.FromDate).ToList();
+        }
+
+        if (model.ToDate != null)
+        {
+            transactions = transactions.Where(x => x.TransactionDate <= model.ToDate).ToList();
+            xchanges = xchanges.Where(x => x.ExChangeData <= model.ToDate).ToList();
+        }
+
+        var t = transactions
+            .SelectMany(tr => _wallet.TransactionConfirmations.Where(tf => tf.TransactionId == tr.Id && tf.Status == 1)
+            .DefaultIfEmpty(), (tr, tf) => new { tr, tf })
+            .ToList();
+
+        var rest = t.Select(x => new ReportVM()
+        {
+            Id = x.tr.Id,
+            SourceAmount = x.tr.Amount != null ? x.tr.Amount : 0,
+            DestinationAmout = null,
+            RepDate = ConvertToPersianDate(x.tr.TransactionDate),
+            WalletId = x.tr.WalletId,
+            SourceWalletCurrencyId = x.tr.WalletCurrencyId,
+            TransactionTypeId = x.tr.TransactionTypeId,
+            TransactionModeId = x.tr.TransactionModeId,
+            SourceWalletCurrency = GetCurrencyType(x.tr.WalletCurrencyId),
+            DestinationWalletCurrencyId = null,
+            TransactionType = GetTransactionType(x.tr.TransactionTypeId),
+            TransactionMode = GetTransactionMode(x.tr.TransactionModeId),
+            ConfirmationUserId = x.tf?.ConfirmationUserId ?? -1,
+            TransactionConfirmId = x.tf?.Id ?? -1,
+            RequestDescription = x.tf?.RequestDescription ?? "",
+            ResponceDescription = x.tf?.ResponceDescription ?? "",
+            TransactionInfo = x.tf?.TransactionInfo ?? "",
+            Status = x.tf?.Status ?? 0,
+            ConfirmationDate = ConvertToPersianDate(x.tf?.ConfirmationDate ?? null),
+        }).ToList();
+
+
+        var resx = xchanges.Select(x => new ReportVM
+        {
+            Id = x.Id,
+            SourceAmount = x.SourceAmount,
+            DestinationAmout = x.DestinationAmout,
+            RepDate = ConvertToPersianDate(x.ExChangeData),
+            WalletId = x.WalletId,
+            SourceWalletCurrencyId = x.SourceWalletCurrency,
+            DestinationWalletCurrencyId = x.DestinationWalletCurrency,
+            TransactionTypeId = (short)Enums.TransactionType.Exchange,
+            TransactionModeId = (short)Enums.TransactionMode.Online,
+            SourceWalletCurrency = GetCurrencyType(x.SourceWalletCurrency),
+            TransactionType = GetExchangeType(x.SourceWalletCurrency),
+            TransactionMode = GetTransactionMode((short)Enums.TransactionMode.Online),
+            ConfirmationUserId = null,
+            TransactionConfirmId = null,
+            RequestDescription = null,
+            ResponceDescription = null,
+            TransactionInfo = null,
+            Status = 1,
+            ConfirmationDate = null,
+        }).ToList();
+
+        var res = rest.Union(resx).Distinct();
+        return res;
+    }
+
+    private string ConvertToPersianDate(DateTime? date)
+    {
+        try
+        {
+            string persianDateString = date.GetValueOrDefault().ToString("yyyy/MM/dd HH:mm:ss", new CultureInfo("fa-IR"));
+            return persianDateString;
+        }
+        catch (Exception)
+        {
+
+            return "";
+        }
+
+    }
+
+    public string GetTransactionType(long tr)
+    {
+        return tr switch
+        {
+            1 => "فروش",
+            2 => "خرید",
+            3 => "برداشت",
+            4 => "واریز",
+            5 => "تبدیل",
+        };
+    }
+
+    public string GetTransactionMode(long tm)
+    {
+        return tm switch
+        {
+            1 => "آنلاین",
+            2 => "آفلاین",
+        };
+    }
+
+    public string GetCurrencyType(long cu)
+    {
+        return cu switch
+        {
+            1 => "پول",
+            2 => "طلا",
+        };
+    }
+
+    public string GetExchangeType(long wc)
+    {
+        return wc switch
+        {
+            1 => "پول به طلا",
+            2 => "طلا به پول",
+        };
     }
 }
 

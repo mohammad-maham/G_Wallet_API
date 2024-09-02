@@ -5,9 +5,9 @@ namespace G_Wallet_API.BusinessLogic.Interfaces;
 
 public interface IFund
 {
-    WalletCurrency? Deposit(TransactionVM model);
-    WalletCurrency? Windrow(WalletCurrency model);
-    Transaction? AddTransaction(TransactionVM model);
+    //WalletCurrency? Deposit(TransactionVM model);
+    TransactionVM AddTransaction(TransactionVM model);
+    WalletCurrency? ConfirmTransaction(TransactionVM model);
     Wallet? GetWallet(int userId);
     WalletBankAccount? AddBankAccount(WalletBankAccount model);
     WalletCurrency AddExchange(Xchenger model);
