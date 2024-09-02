@@ -171,34 +171,7 @@ public class FundController : ControllerBase
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult Windrow([FromBody] WalletCurrency model)
-    {
-        try
-        {
-            var t = _fund.FindWallerCurrency(model.WalletId, model.CurrencyId);
-            if (t == null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
-
-            var wc = _fund.Windrow(model);
-
-            if (wc == null)
-                return BadRequest(new ApiResponse(400));
-
-            string? jsonData = JsonConvert.SerializeObject(wc);
-            return Ok(new ApiResponse(data: jsonData));
-
-        }
-        catch (Exception e)
-        {
-
-            Console.WriteLine(e.Message);
-            throw;
-        }
-    }
-
-    [HttpPost]
-    [Route("[action]")]
-    public IActionResult Deposit([FromBody] TransactionVM model)
+    public IActionResult ConfirmTransaction([FromBody] TransactionVM model)
     {
         try
         {
@@ -206,7 +179,8 @@ public class FundController : ControllerBase
             if (t == null)
                 return BadRequest(new ApiResponse { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
 
-            var wc = _fund.Deposit(model);
+            var wc = _fund.ConfirmTransaction(model);
+
             if (wc == null)
                 return BadRequest(new ApiResponse(400));
 
@@ -221,6 +195,32 @@ public class FundController : ControllerBase
             throw;
         }
     }
+
+    //[HttpPost]
+    //[Route("[action]")]
+    //public IActionResult Deposit([FromBody] TransactionVM model)
+    //{
+    //    try
+    //    {
+    //        var t = _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
+    //        if (t == null)
+    //            return BadRequest(new ApiResponse { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
+
+    //        var wc = _fund.Deposit(model);
+    //        if (wc == null)
+    //            return BadRequest(new ApiResponse(400));
+
+    //        string? jsonData = JsonConvert.SerializeObject(wc);
+    //        return Ok(new ApiResponse(data: jsonData));
+
+    //    }
+    //    catch (Exception e)
+    //    {
+
+    //        Console.WriteLine(e.Message);
+    //        throw;
+    //    }
+    //}
 
 
     [HttpPost]
@@ -230,6 +230,9 @@ public class FundController : ControllerBase
         try
         {
             var t = _fund.AddTransaction(model);
+
+            if(t==null)
+                return BadRequest(new ApiResponse { StatusCode = 400, Message = "بروز خطا در ثبت تراکنش" });
 
             string? jsonData = JsonConvert.SerializeObject(t);
             return Ok(new ApiResponse(data: jsonData));

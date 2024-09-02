@@ -7,9 +7,9 @@ namespace G_Wallet_API.Models.VM;
 public partial class ReportVM
 {
     public long? Id { get; set; }
+    public long? TransactionConfirmId { get; set; }
 
     public long? WalletId { get; set; }
-    public long? WalletCurrencyId { get; set; }
 
     public short? TransactionTypeId { get; set; }
     public string? TransactionType { get; set; }
@@ -27,7 +27,8 @@ public partial class ReportVM
 
     public string? TrackingCode { get; set; }
 
-    public decimal? Amount { get; set; }
+    public decimal? SourceAmount { get; set; }
+    public decimal? DestinationAmout { get; set; }
 
     public string? SourceAddress { get; set; }
 
@@ -39,11 +40,17 @@ public partial class ReportVM
     public long? DestinationWalletCurrencyId { get; set; }
     public string? DestinationWalletCurrency { get; set; }
 
-    public decimal? SourceAmount { get; set; }
-
     public long? UserId { get; set; }
 
-    public decimal? DestinationAmout { get; set; }
 
+    public long? ConfirmationUserId { get; set; }
+
+    public string? ConfirmationDate { get; set; }
+
+    public string? RequestDescription { get; set; }
+
+    public string? ResponceDescription { get; set; }
+
+    public string? TransactionInfo { get; set; }
 
 }

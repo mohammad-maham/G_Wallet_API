@@ -3,7 +3,7 @@
 public class FilterVM
 {
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
     public DateTime? ToDate { get; set; }
     public DateTime? FromDate { get; set; }
     public long? WalletId { get; set; }
