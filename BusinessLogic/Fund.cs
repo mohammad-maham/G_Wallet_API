@@ -284,7 +284,7 @@ public class Fund : IFund
                 }
                 catch (Exception)
                 {
-                    transaction.Commit();
+                    transaction.Dispose();
                     throw;
                 }
 
@@ -345,7 +345,7 @@ public class Fund : IFund
                 }
                 catch (Exception)
                 {
-                    transaction.Commit();
+                    transaction.Dispose();
                     throw;
                 }
 
