@@ -130,7 +130,8 @@ public class Fund : IFund
             RegionId = model.RegionId,
             Shaba = model.Shaba,
             WalletId = model.WalletId,
-            ValidationInfo = model.ValidationInfo
+            ValidationInfo = model.ValidationInfo,
+            Name = model.Name,
         };
 
         _wallet.WalletBankAccounts.Add(w);

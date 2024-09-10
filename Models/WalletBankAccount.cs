@@ -25,4 +25,5 @@ public partial class WalletBankAccount
     public DateTime? RegDate { get; set; }
 
     public string? ValidationInfo { get; set; }
+    public string? Name { get; set; }
 }
