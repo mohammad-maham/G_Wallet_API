@@ -448,6 +448,7 @@ public class Fund : IFund
             transactions = transactions.Where(x => x.WalletId == w.Id).ToList();
             xchanges = xchanges.Where(x => x.WalletId == w.Id).ToList();
         }
+ 
 
         if (model.TransactionTypeId != null)
             transactions = transactions.Where(x => x.TransactionTypeId == model.TransactionTypeId).ToList();
@@ -468,7 +469,7 @@ public class Fund : IFund
         }
 
         var t = transactions
-            .SelectMany(tr => _wallet.TransactionConfirmations.Where(tf => tf.TransactionId == tr.Id && tf.Status == 1)
+            .SelectMany(tr => _wallet.TransactionConfirmations.Where(tf => tf.TransactionId == tr.Id )
             .DefaultIfEmpty(), (tr, tf) => new { tr, tf })
             .ToList();
 
