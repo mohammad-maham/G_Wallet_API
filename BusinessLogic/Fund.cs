@@ -29,7 +29,7 @@ public class Fund : IFund
 
     public Wallet? GetWallet(int userId)
     {
-        var t = _wallet.Wallets.FirstOrDefault(x => x.UserId == userId);
+        var t = _wallet.Wallets.FirstOrDefault(x => x.UserId == userId );
         long walletId = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletid");
 
         if (t == null)
@@ -54,16 +54,18 @@ public class Fund : IFund
                 Status = 1,
                 WcAddress = Guid.NewGuid().ToString(),
             };
+            var wcGold = new WalletCurrency
+            {
+                Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletcurrency"),
+                WalletId = walletId,
+                Amount = 0,
+                CurrencyId = 2,
+                RegDate = DateTime.Now,
+                Status = 1,
+                WcAddress = Guid.NewGuid().ToString(),
+            };
             _wallet.WalletCurrencies.Add(wc);
-
-            var wcGold = new WalletCurrency();
-            wcGold = wc;
-
-            wcGold.Id = DataBaseHelper.GetPostgreSQLSequenceNextVal(_wallet, "seq_walletcurrency");
-            wcGold.CurrencyId = 2;
-
             _wallet.WalletCurrencies.Add(wcGold);
-
             _wallet.SaveChanges();
 
             return w;
