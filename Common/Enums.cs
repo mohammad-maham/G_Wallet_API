@@ -1,21 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace G_Wallet_API.Common;
+﻿namespace G_Wallet_API.Common;
 
 public class Enums
 {
-
-    public enum GoldHost
-    {
-        Accounting,
-        IPG,
-        Store,
-        Wallet,
-    }
-
     public enum TransactionType
     {
         Sell = 1,

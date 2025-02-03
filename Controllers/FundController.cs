@@ -1,9 +1,9 @@
 ﻿using G_Wallet_API.BusinessLogic.Interfaces;
-using G_Wallet_API.Common;
 using G_Wallet_API.Models;
 using G_Wallet_API.Models.VM;
+using GoldHelpers.Helpers;
+using GoldHelpers.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace G_Wallet_API.Controllers;
@@ -23,25 +23,25 @@ public class FundController : ControllerBase
         _wallet = wallet;
     }
 
-
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetWallet([FromBody] Wallet model)
     {
         try
         {
             if (model.UserId <= 0)
-                return BadRequest(new ApiResponse(500));
+                return BadRequest(new GoldAPIResult(500));
 
             var t = _fund.GetWallet((int)model.UserId);
 
             if (t != null)
             {
                 string? jsonData = JsonConvert.SerializeObject(t);
-                return Ok(new ApiResponse(data: jsonData));
+                return Ok(new GoldAPIResult(data: jsonData));
             }
 
-            return BadRequest(new ApiResponse(500));
+            return BadRequest(new GoldAPIResult(500));
 
         }
         catch (Exception e)
@@ -54,6 +54,7 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetWalletCurrency([FromBody] Wallet model)
     {
@@ -63,11 +64,11 @@ public class FundController : ControllerBase
             var t = _fund.GetWalletCurrency((int)model.UserId);
 
             if (t == null)
-                return BadRequest(new ApiResponse(400));
+                return BadRequest(new GoldAPIResult(400));
 
             string? jsonData = JsonConvert.SerializeObject(t);
 
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -81,13 +82,14 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetTransactions([FromBody] FilterVM model)
     {
         try
         {
             if (model.UserId <= 0)
-                return BadRequest(new ApiResponse(500));
+                return BadRequest(new GoldAPIResult(500));
 
             var w = _fund.GetWallet((int)model.UserId);
 
@@ -97,10 +99,10 @@ public class FundController : ControllerBase
             if (t != null)
             {
                 string? jsonData = JsonConvert.SerializeObject(t);
-                return Ok(new ApiResponse(data: jsonData));
+                return Ok(new GoldAPIResult(data: jsonData));
             }
 
-            return BadRequest(new ApiResponse(500));
+            return BadRequest(new GoldAPIResult(500));
 
         }
         catch (Exception e)
@@ -113,23 +115,24 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetFinancialReport([FromBody] FilterVM model)
     {
         try
         {
             if (model.UserId <= 0)
-                return BadRequest(new ApiResponse(500));
+                return BadRequest(new GoldAPIResult(500));
 
             var res = _fund.GetFinancialReport(model);
 
             if (res != null)
             {
                 string? jsonData = JsonConvert.SerializeObject(res);
-                return Ok(new ApiResponse(data: jsonData));
+                return Ok(new GoldAPIResult(data: jsonData));
             }
 
-            return BadRequest(new ApiResponse(500));
+            return BadRequest(new GoldAPIResult(500));
 
         }
         catch (Exception e)
@@ -142,6 +145,7 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetBankAccounts(Wallet model)
     {
@@ -152,11 +156,11 @@ public class FundController : ControllerBase
             var t = _fund.GetBankAccounts((int)w.Id);
 
             if (t == null)
-                return BadRequest(new ApiResponse(400));
+                return BadRequest(new GoldAPIResult(400));
 
             string? jsonData = JsonConvert.SerializeObject(t);
 
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -170,6 +174,7 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult ConfirmTransaction([FromBody] TransactionVM model)
     {
@@ -177,15 +182,15 @@ public class FundController : ControllerBase
         {
             var t = _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
             if (t == null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
+                return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
 
             var wc = _fund.ConfirmTransaction(model);
 
             if (wc == null)
-                return BadRequest(new ApiResponse(400));
+                return BadRequest(new GoldAPIResult(400));
 
             string? jsonData = JsonConvert.SerializeObject(wc);
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -204,14 +209,14 @@ public class FundController : ControllerBase
     //    {
     //        var t = _fund.FindWallerCurrency(model.WalletId, model.WalletCurrencyId);
     //        if (t == null)
-    //            return BadRequest(new ApiResponse { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
+    //            return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "کیف پول مبدا پیدا نشد." });
 
     //        var wc = _fund.Deposit(model);
     //        if (wc == null)
-    //            return BadRequest(new ApiResponse(400));
+    //            return BadRequest(new GoldAPIResult(400));
 
     //        string? jsonData = JsonConvert.SerializeObject(wc);
-    //        return Ok(new ApiResponse(data: jsonData));
+    //        return Ok(new GoldAPIResult(data: jsonData));
 
     //    }
     //    catch (Exception e)
@@ -224,6 +229,7 @@ public class FundController : ControllerBase
 
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult AddTransaction([FromBody] TransactionVM model)
     {
@@ -231,11 +237,11 @@ public class FundController : ControllerBase
         {
             var t = _fund.AddTransaction(model);
 
-            if(t==null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "بروز خطا در ثبت تراکنش" });
+            if (t == null)
+                return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "بروز خطا در ثبت تراکنش" });
 
             string? jsonData = JsonConvert.SerializeObject(t);
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -247,6 +253,7 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult AddBankAccount([FromBody] WalletBankAccount model)
     {
@@ -255,15 +262,15 @@ public class FundController : ControllerBase
             var t = _wallet.WalletBankAccounts.FirstOrDefault(x => x.BankAccountNumber == model.BankAccountNumber && x.BankId == model.BankId);
 
             if (t != null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "این حساب قبلا ثبت شده است." });
+                return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "این حساب قبلا ثبت شده است." });
 
             var b = _fund.AddBankAccount(model);
 
             if (b == null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "بروز خطا" });
+                return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "بروز خطا" });
 
             string? jsonData = JsonConvert.SerializeObject(b);
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -275,6 +282,7 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult ToggleBankCard([FromBody] WalletBankAccount model)
     {
@@ -283,11 +291,11 @@ public class FundController : ControllerBase
             var t = _wallet.WalletBankAccounts.Find(model.Id);
 
             if (t == null)
-                return BadRequest(new ApiResponse { StatusCode = 400, Message = "حساب بانکی مورد نظر یافت نشد." });
+                return BadRequest(new GoldAPIResult { StatusCode = 400, Message = "حساب بانکی مورد نظر یافت نشد." });
 
             var b = _fund.ToggleBankCard(model);
             string? jsonData = JsonConvert.SerializeObject(b);
-            return Ok(new ApiResponse(data: jsonData));
+            return Ok(new GoldAPIResult(data: jsonData));
 
         }
         catch (Exception e)
@@ -300,6 +308,7 @@ public class FundController : ControllerBase
 
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult ExChange([FromBody] Xchenger model)
     {
@@ -308,17 +317,17 @@ public class FundController : ControllerBase
         {
             var t = _fund.FindWallerCurrency((long)model.WalletId, model.SourceWalletCurrency);
             if (t == null)
-                return BadRequest(new ApiResponse { Message = "کیف پول مبدا پیدا نشد." });
+                return BadRequest(new GoldAPIResult { Message = "کیف پول مبدا پیدا نشد." });
 
             if (t.Amount < model.SourceAmount)
-                return BadRequest(new ApiResponse { Message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد." });
+                return BadRequest(new GoldAPIResult { Message = "     مقدار درخواستی بیش از موجودی کیف پول مبدا میباشد." });
 
             var exchange = _fund.AddExchange(model);
 
             if (exchange != null)
-                return Ok(new ApiResponse { StatusCode = 200, Data = JsonConvert.SerializeObject("true") });
+                return Ok(new GoldAPIResult { StatusCode = 200, Data = JsonConvert.SerializeObject("true") });
 
-            return BadRequest(new ApiResponse(500));
+            return BadRequest(new GoldAPIResult(500));
         }
         catch (Exception e)
         {
@@ -330,13 +339,14 @@ public class FundController : ControllerBase
     }
 
     [HttpPost]
+    [GoldAuthorize]
     [Route("[action]")]
     public IActionResult GetExchanges([FromBody] FilterVM model)
     {
         try
         {
             if (model.UserId <= 0)
-                return BadRequest(new ApiResponse(500));
+                return BadRequest(new GoldAPIResult(500));
 
             var w = _fund.GetWallet((int)model.UserId);
 
@@ -346,10 +356,10 @@ public class FundController : ControllerBase
             if (t != null)
             {
                 string? jsonData = JsonConvert.SerializeObject(t);
-                return Ok(new ApiResponse(data: jsonData));
+                return Ok(new GoldAPIResult(data: jsonData));
             }
 
-            return BadRequest(new ApiResponse(500));
+            return BadRequest(new GoldAPIResult(500));
 
         }
         catch (Exception e)
