@@ -18,7 +18,7 @@ public partial class Transaction
 
     public short? Status { get; set; }
 
-    public DateTime? TransactionDate { get; set; }
+    public Instant TransactionDate { get; set; }
 
     public string? Info { get; set; }
 
@@ -27,5 +27,4 @@ public partial class Transaction
     public string? TrackingCode { get; set; }
 
     public decimal? Amount { get; set; }
-
 }

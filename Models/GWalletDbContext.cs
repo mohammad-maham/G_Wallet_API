@@ -19,11 +19,17 @@ public partial class GWalletDbContext : DbContext
 
     public virtual DbSet<Currency> Currencies { get; set; }
 
+    public virtual DbSet<Service> Services { get; set; }
+
+    public virtual DbSet<Setting> Settings { get; set; }
+
     public virtual DbSet<Status> Statuses { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<TransactionConfirmation> TransactionConfirmations { get; set; }
+
+    public virtual DbSet<TransactionDetail> TransactionDetails { get; set; }
 
     public virtual DbSet<TransactionMode> TransactionModes { get; set; }
 
@@ -40,7 +46,8 @@ public partial class GWalletDbContext : DbContext
     public virtual DbSet<Xchenger> Xchengers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=194.60.231.81:5432;Database=G_Wallet_DB;Username=postgres;Password=Maham@7796", x => x.UseNodaTime());
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=194.60.231.11:5432;Database=G_Wallet_DB;Username=postgres;Password=7796", x => x.UseNodaTime());
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,6 +71,31 @@ public partial class GWalletDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Service>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Service_pkey");
+
+            entity.ToTable("Service");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.AccessInfo).HasColumnType("json");
+            entity.Property(e => e.Caption).HasMaxLength(50);
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Setting>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Setting_pkey");
+
+            entity.ToTable("Setting");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Caption).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Nsme).HasMaxLength(100);
+            entity.Property(e => e.Value).HasMaxLength(200);
         });
 
         modelBuilder.Entity<Status>(entity =>
@@ -99,6 +131,15 @@ public partial class GWalletDbContext : DbContext
             entity.Property(e => e.RequestDescription).HasMaxLength(300);
             entity.Property(e => e.ResponceDescription).HasMaxLength(300);
             entity.Property(e => e.TransactionInfo).HasColumnType("json");
+        });
+
+        modelBuilder.Entity<TransactionDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TransactionDetail_pkey");
+
+            entity.ToTable("TransactionDetail");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<TransactionMode>(entity =>
@@ -140,18 +181,18 @@ public partial class GWalletDbContext : DbContext
             entity.ToTable("Wallet");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.WalletNumber).HasPrecision(16);
         });
 
         modelBuilder.Entity<WalletBankAccount>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("WalletBankAccount_pkey");
+            entity
+                .HasNoKey()
+                .ToTable("WalletBankAccount");
 
-            entity.ToTable("WalletBankAccount");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.OrderId).HasDefaultValue((short)0);
-            entity.Property(e => e.Shaba).HasMaxLength(20);
-            entity.Property(e => e.Status).HasDefaultValue((short)1);
+            entity.Property(e => e.BankAccountNumber).HasMaxLength(20);
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Shaba).HasMaxLength(24);
             entity.Property(e => e.ValidationInfo).HasMaxLength(20);
         });
 

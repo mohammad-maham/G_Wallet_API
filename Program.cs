@@ -1,10 +1,10 @@
 using G_Wallet_API.BusinessLogic;
 using G_Wallet_API.BusinessLogic.Interfaces;
 using G_Wallet_API.Models;
-using GoldHelpers.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using GoldHelpers.Middleware;
 
 namespace Accounting;
 

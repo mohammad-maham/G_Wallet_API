@@ -10,7 +10,9 @@ public partial class Wallet
 
     public long UserId { get; set; }
 
-    public DateTime CreateDate { get; set; }
+    public Instant CreateDate { get; set; }
 
     public short Status { get; set; }
+
+    public decimal WalletNumber { get; set; }
 }

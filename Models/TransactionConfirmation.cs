@@ -12,13 +12,13 @@ public partial class TransactionConfirmation
 
     public short Status { get; set; }
 
-    public long ConfirmationUserId { get; set; }
-
-    public DateTime? ConfirmationDate { get; set; }
+    public long? ConfirmationUserId { get; set; }
 
     public string? RequestDescription { get; set; }
 
     public string? ResponceDescription { get; set; }
 
     public string? TransactionInfo { get; set; }
+
+    public Instant? ConfirmationDate { get; set; }
 }

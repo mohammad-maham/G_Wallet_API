@@ -1,0 +1,5 @@
+Host=194.60.231.11:5432;Database=G_Accounting_DB;Username=postgres;Password=7796
+
+
+
+dotnet ef dbcontext scaffold "Host=194.60.231.11:5432;Database=G_Wallet_DB;Username=postgres;Password=7796" Npgsql.EntityFrameworkCore.PostgreSQL --output-dir Models

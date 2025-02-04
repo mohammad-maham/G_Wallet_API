@@ -14,9 +14,9 @@ public partial class WalletCurrency
 
     public short Status { get; set; }
 
-    public DateTime RegDate { get; set; }
+    public Instant RegDate { get; set; }
 
-    public decimal? Amount { get; set; }
+    public decimal Amount { get; set; }
 
     public string? WcAddress { get; set; }
 }
